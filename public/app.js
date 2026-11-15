@@ -490,6 +490,44 @@ function connectLiveStream() {
   source.onerror = () => updateConnection(false, false, Boolean(latestReading && latestReading.fire && latestReading.fire.active), Boolean(latestReading && latestReading.status === "WARNING"));
 }
 
+function showScreen(name, updateUrl = true) {
+  const allowedScreens = new Set(["overview", "activity", "device", "guide"]);
+  const screenName = allowedScreens.has(name) ? name : "overview";
+  const targetScreen = document.querySelector(`[data-screen="${screenName}"]`);
+  if (!targetScreen) return;
+  const alreadyActive = targetScreen.classList.contains("is-active");
+
+  document.querySelectorAll(".screen-view").forEach((screen) => {
+    const active = screen === targetScreen;
+    screen.hidden = !active;
+    screen.classList.toggle("is-active", active);
+  });
+
+  document.querySelectorAll("[data-screen-target]").forEach((control) => {
+    if (!control.classList.contains("rail-link")) return;
+    const active = control.dataset.screenTarget === screenName;
+    control.classList.toggle("active", active);
+    if (active) control.setAttribute("aria-current", "page");
+    else control.removeAttribute("aria-current");
+  });
+
+  if (updateUrl && !alreadyActive) window.history.pushState({ screen: screenName }, "", `#${screenName}`);
+  if (!alreadyActive) {
+    window.scrollTo(0, 0);
+    targetScreen.focus({ preventScroll: true });
+  }
+  if (screenName === "activity") drawChart();
+}
+
+document.querySelectorAll("[data-screen-target]").forEach((control) => {
+  control.addEventListener("click", (event) => {
+    event.preventDefault();
+    showScreen(control.dataset.screenTarget);
+  });
+});
+
+window.addEventListener("popstate", () => showScreen(window.location.hash.slice(1), false));
+
 $("#acknowledgeAlert").addEventListener("click", closeAlert);
 $("#enableAlerts").addEventListener("click", enableBrowserAlerts);
 $("#enableAlertsSecondary").addEventListener("click", enableBrowserAlerts);
@@ -500,6 +538,7 @@ window.addEventListener("keydown", (event) => {
 window.addEventListener("focus", () => { if (latestReading) drawChart(); });
 
 greeting();
+showScreen(window.location.hash.slice(1), false);
 if (window.EMBERWATCH_POLLING) {
   startPolling();
 } else {

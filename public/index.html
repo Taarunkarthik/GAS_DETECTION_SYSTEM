@@ -17,35 +17,35 @@
     <div class="paper-grain" aria-hidden="true"></div>
     <div class="app-frame">
       <aside class="rail" aria-label="Main navigation">
-        <a class="brand-mark" href="#overview" aria-label="Emberwatch home">
+        <button class="brand-mark" type="button" data-screen-target="overview" aria-controls="screen-overview" aria-label="Emberwatch home">
           <svg viewBox="0 0 36 42" fill="none" aria-hidden="true">
             <path d="M19.9 3.4c1.6 7.8-3.7 9.5-1.6 14.6 1.3-2.2 2.8-3.3 4.8-4 5.5 4.8 7.8 8.9 6.5 14.3-1.2 5.4-5.8 8.7-11.7 8.7-6.8 0-11.7-4.4-11.7-11 0-5.1 2.6-9.3 7.6-13.7-.4 4.4 1.1 6.3 2.4 7.4-1.7-7.1 1.7-10.1 3.7-16.3Z" fill="currentColor"/>
             <path d="M18 24.5c3 3.1 4 4.8 3.4 6.7-.5 1.7-1.8 2.6-3.6 2.6-2.1 0-3.4-1.4-3.4-3.4 0-2 1.1-3.7 3.6-5.9Z" fill="#171916"/>
           </svg>
           <span>EW</span>
-        </a>
+        </button>
 
         <div class="rail-station"><span>FIELD</span><b>01</b></div>
         <nav class="rail-nav">
-          <a class="rail-link active" href="#overview" aria-label="Overview" title="Overview">
+          <button class="rail-link active" type="button" data-screen-target="overview" aria-controls="screen-overview" aria-current="page" aria-label="Overview" title="Overview">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
             <span>Overview</span>
-          </a>
-          <a class="rail-link" href="#activity" aria-label="Activity log" title="Activity log">
+          </button>
+          <button class="rail-link" type="button" data-screen-target="activity" aria-controls="screen-activity" aria-label="Activity log" title="Activity log">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18.5V13m5 5.5V8m5 10.5v-7m5 7V5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 21h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             <span>Activity</span>
-          </a>
-          <a class="rail-link" href="#device" aria-label="Device status" title="Device status">
+          </button>
+          <button class="rail-link" type="button" data-screen-target="device" aria-controls="screen-device" aria-label="Device status" title="Device status">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M9 7h6m-6 3h6m-6 3h3m-3 4h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             <span>Device</span>
-          </a>
+          </button>
         </nav>
 
         <div class="rail-bottom">
-          <a class="rail-link rail-help" href="/setup.html" aria-label="Setup guide" title="Setup guide">
+          <button class="rail-link rail-help" type="button" data-screen-target="guide" aria-controls="screen-guide" aria-label="Setup guide" title="Setup guide">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M9.2 9a2.9 2.9 0 1 1 5.3 1.7c-.9 1-2.5 1.4-2.5 3.1M12 17v.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             <span>Guide</span>
-          </a>
+          </button>
           <div class="rail-avatar" aria-label="Fire lab project">FL</div>
         </div>
       </aside>
@@ -64,6 +64,7 @@
         </header>
 
         <div class="dashboard-content">
+          <section class="screen-view is-active" id="screen-overview" data-screen="overview" aria-label="Overview" tabindex="-1">
           <section class="intro-row">
             <div>
               <div class="section-tag"><span class="tag-index">01</span> SENSOR WATCH <i></i><span id="greetingTime">TODAY</span></div>
@@ -145,23 +146,24 @@
               <div class="sensor-bottom"><span class="sensor-state state-muted" id="smokeState">Awaiting reading</span><span class="limit-label">WARN / FIRE <b id="smokeLimit">225 / 300</b></span></div>
             </article>
 
-            <article class="sensor-card device-card" id="device">
-              <div class="sensor-card-head">
-                <span class="sensor-symbol device-symbol"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M9 7h6m-6 3h6m-6 3h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="17" r=".8" fill="currentColor"/></svg></span>
-                <span class="sensor-index">UPLINK / 03</span>
-                <span class="sensor-live-dot"></span>
-              </div>
-              <div class="device-primary"><span class="device-status-dot" id="deviceStatusDot"></span><strong id="deviceState">Not connected</strong></div>
-              <div class="device-caption" id="deviceCaption">Waiting for first heartbeat</div>
-              <div class="device-readout"><span>Wi-Fi signal</span><b id="wifiValue">-- dBm</b></div>
-              <div class="device-readout"><span>Relative humidity</span><b id="humidityValue">--%</b></div>
-              <div class="device-readout"><span>Last heartbeat</span><b id="heartbeatValue">--</b></div>
-              <div class="uplink-track"><span id="deviceProgress"></span></div>
-            </article>
+
           </section>
 
+                    <section class="setup-strip">
+            <div class="setup-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.4"/><path d="m8.5 12 2.3 2.3 4.8-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="setup-copy"><span>NEED TO BRING IT ONLINE?</span><strong>Start with the wiring, then wake the monitor.</strong><small>Open the field guide for pins, Wi-Fi, and upload steps.</small></div>
+            <button type="button" class="setup-link" data-screen-target="guide" aria-controls="screen-guide">FIELD GUIDE <span>↗</span></button>
+          </section>
+          </section>
+
+          <section class="screen-view" id="screen-activity" data-screen="activity" aria-label="Activity" tabindex="-1" hidden>
+            <div class="screen-intro">
+              <div class="section-tag"><span class="tag-index">02</span> ACTIVITY LOG <i></i> LIVE STREAM</div>
+              <h1>Signals leave a trail.</h1>
+              <p class="intro-copy">Follow sensor movement and review every recorded alert.</p>
+            </div>
           <section class="section-heading activity-title">
-            <div><span class="section-number">03 /</span><h2>Signal history</h2><p>Trace the pattern, not just the moment</p></div>
+            <div><span class="section-number">02 /</span><h2>Signal history</h2><p>Trace the pattern, not just the moment</p></div>
             <div class="history-note"><span class="history-dot"></span> LIVE DATA <span class="history-separator">/</span> <span id="chartCount">0 samples</span></div>
           </section>
 
@@ -185,10 +187,75 @@
             </article>
           </section>
 
-          <section class="setup-strip">
-            <div class="setup-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.4"/><path d="m8.5 12 2.3 2.3 4.8-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <div class="setup-copy"><span>NEED TO BRING IT ONLINE?</span><strong>Start with the wiring, then wake the monitor.</strong><small>Open the field guide for pins, Wi-Fi, and upload steps.</small></div>
-            <a href="/setup.html" class="setup-link">FIELD GUIDE <span>↗</span></a>
+
+
+          </section>
+
+          <section class="screen-view" id="screen-device" data-screen="device" aria-label="Device" tabindex="-1" hidden>
+            <div class="screen-intro">
+              <div class="section-tag"><span class="tag-index">03</span> DEVICE DOSSIER <i></i> ESP32 / 01</div>
+              <h1>Your sensor, on the line.</h1>
+              <p class="intro-copy">Connection health, signal strength, and the hardware map for this station.</p>
+            </div>
+            <div class="device-layout">
+              <article class="sensor-card device-card" id="device">
+              <div class="sensor-card-head">
+                <span class="sensor-symbol device-symbol"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M9 7h6m-6 3h6m-6 3h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="17" r=".8" fill="currentColor"/></svg></span>
+                <span class="sensor-index">UPLINK / 03</span>
+                <span class="sensor-live-dot"></span>
+              </div>
+              <div class="device-primary"><span class="device-status-dot" id="deviceStatusDot"></span><strong id="deviceState">Not connected</strong></div>
+              <div class="device-caption" id="deviceCaption">Waiting for first heartbeat</div>
+              <div class="device-readout"><span>Wi-Fi signal</span><b id="wifiValue">-- dBm</b></div>
+              <div class="device-readout"><span>Relative humidity</span><b id="humidityValue">--%</b></div>
+              <div class="device-readout"><span>Last heartbeat</span><b id="heartbeatValue">--</b></div>
+              <div class="uplink-track"><span id="deviceProgress"></span></div>
+            </article>
+              <article class="device-info-panel">
+                <div class="device-info-heading"><span class="panel-label">HARDWARE MAP · ESP32 DEVKIT</span><h3>Signal routing</h3><p>Sensor and alarm connections at a glance.</p></div>
+                <div class="pin-map">
+                  <div><span class="pin-badge pin-amber">DHT</span><span><strong>Temperature + humidity</strong><small>GPIO 4 · DHT11</small></span></div>
+                  <div><span class="pin-badge pin-teal">MQ</span><span><strong>Smoke sensor analog</strong><small>GPIO 34 · ADC input</small></span></div>
+                  <div><span class="pin-badge pin-red">LED</span><span><strong>Alert / safe indicators</strong><small>GPIO 18 red · GPIO 19 green</small></span></div>
+                  <div><span class="pin-badge pin-violet">BZ</span><span><strong>Local buzzer driver</strong><small>GPIO 26 · active buzzer</small></span></div>
+                </div>
+                <div class="device-path"><span class="path-node">SENSORS</span><i></i><span class="path-node">ESP32</span><i></i><span class="path-node">WI-FI</span><i></i><span class="path-node">DASHBOARD</span></div>
+                <p class="device-safety-note"><b>Hardware note</b> Keep the MQ-2 analog signal at or below 3.3 V before it reaches GPIO 34.</p>
+              </article>
+            </div>
+            <div class="device-footer-strip"><span class="device-footer-icon">↗</span><span><b>Need to change wiring or reconnect?</b><small>Open the field guide for the full setup sequence.</small></span><button class="setup-link" type="button" data-screen-target="guide" aria-controls="screen-guide">OPEN FIELD GUIDE <span>→</span></button></div>
+          </section>
+
+          <section class="screen-view" id="screen-guide" data-screen="guide" aria-label="Guide" tabindex="-1" hidden>
+            <div class="screen-intro">
+              <div class="section-tag"><span class="tag-index">04</span> FIELD GUIDE <i></i> QUICK REFERENCE</div>
+              <h1>Build the watch.</h1>
+              <p class="intro-copy">Wire it safely, upload the sketch, and bring the live dashboard online.</p>
+            </div>
+            <div class="guide-caution"><span class="caution-mark">!</span><span><b>Educational prototype only.</b> MQ-2 readings are raw ADC values, not ppm. This system is not a certified fire alarm; keep approved alarms installed.</span></div>
+            <div class="guide-step-grid">
+              <article class="guide-step-card"><div class="guide-step-number">01</div><span class="guide-step-label">HARDWARE</span><h3>Wire the sensors</h3><p>Connect DHT11 data to GPIO 4 and MQ-2 analog output to GPIO 34. Use a divider if the MQ-2 output can exceed 3.3 V.</p><div class="guide-chip-row"><span>DHT11 · GPIO 4</span><span>MQ-2 · GPIO 34</span></div></article>
+              <article class="guide-step-card"><div class="guide-step-number">02</div><span class="guide-step-label">LOCAL ALARM</span><h3>Add the indicators</h3><p>Use GPIO 18 for the red LED, GPIO 19 for the green LED, and GPIO 26 for a buzzer driver. Add LED resistors and drive the buzzer through a transistor.</p><div class="guide-chip-row"><span>RED · 18</span><span>GREEN · 19</span><span>BUZZER · 26</span></div></article>
+              <article class="guide-step-card"><div class="guide-step-number">03</div><span class="guide-step-label">ARDUINO IDE</span><h3>Upload the firmware</h3><p>Install the ESP32 board package, Adafruit DHT sensor library, and Adafruit Unified Sensor library. Open the sketch with its adjacent <code>Config.h</code>.</p><div class="guide-chip-row"><span>ESP32 DEV MODULE</span><span>9600 BAUD</span></div></article>
+              <article class="guide-step-card"><div class="guide-step-number">04</div><span class="guide-step-label">DASHBOARD</span><h3>Connect the backend</h3><p>Run Docker Compose, set the Wi-Fi network and API settings in <code>Config.h</code>, then upload again. Local LED and buzzer alerts operate on the ESP32.</p><div class="guide-chip-row"><span>HOST PORT · 3001</span><span>API · /READINGS</span></div></article>
+            </div>
+            <div class="guide-bottom-grid">
+              <article class="guide-details">
+                <span class="panel-label">PIN REFERENCE</span><h3>Connections</h3>
+                <div class="guide-pin-row"><span>DHT11 DATA</span><b>GPIO 4</b></div>
+                <div class="guide-pin-row"><span>MQ-2 ANALOG</span><b>GPIO 34</b></div>
+                <div class="guide-pin-row"><span>RED / GREEN LED</span><b>GPIO 18 / 19</b></div>
+                <div class="guide-pin-row"><span>BUZZER DRIVER</span><b>GPIO 26</b></div>
+              </article>
+              <article class="guide-details threshold-details">
+                <span class="panel-label">STARTER THRESHOLDS</span><h3>Read the signal</h3>
+                <div class="guide-threshold"><span>Temperature warning</span><b>30 °C</b></div>
+                <div class="guide-threshold"><span>Temperature fire</span><b>35 °C</b></div>
+                <div class="guide-threshold"><span>Smoke warning</span><b>225 ADC</b></div>
+                <div class="guide-threshold"><span>Smoke fire</span><b>300 ADC</b></div>
+                <small>Calibrate these demo values for your specific sensors.</small>
+              </article>
+            </div>
           </section>
 
           <footer class="page-footer"><span>EMBERWATCH <i>/</i> FIELD CONSOLE</span><span>Sensor prototype <b>·</b> Keep certified alarms installed</span></footer>
