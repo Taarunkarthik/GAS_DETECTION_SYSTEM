@@ -8,7 +8,7 @@ An ESP32 sensor prototype with local alarms and a live web dashboard.
 
 <img alt="ESP32" src="https://img.shields.io/badge/Board-ESP32-00979D?logo=espressif&logoColor=white">
 <img alt="Node.js 18+" src="https://img.shields.io/badge/Backend-Node.js%2018%2B-339933?logo=nodedotjs&logoColor=white">
-<img alt="No Docker" src="https://img.shields.io/badge/Deployment-No%20Docker-2496ED?logo=docker&logoColor=white">
+<img alt="Docker" src="https://img.shields.io/badge/Container-Docker-2496ED?logo=docker&logoColor=white">
 
 </div>
 
@@ -36,7 +36,7 @@ Emberwatch reads temperature, humidity, and raw smoke-sensor values. The ESP32 c
 - Posts readings to a small Node.js API about every two seconds.
 - Updates the dashboard live using server-sent events (SSE).
 - Shows current device status, sensor readings, alert history, and a fire popup.
-- Runs without Docker or third-party Node packages.
+- Runs in Docker with Compose; the Node backend has no third-party package dependencies.
 
 ## System overview
 
@@ -73,18 +73,22 @@ This firmware is written for an **ESP32 DevKit V1**. A classic Arduino Uno needs
 
 ## Run locally
 
-### 1. Start the backend
+### Start with Docker
 
-Install Node.js 18 or later. From the project folder, open a VS Code terminal and run:
+Install Docker Desktop and start it. From the project folder, open a terminal and run:
 
 ```powershell
 Copy-Item .env.example .env  # only needed the first time
-npm start
+docker compose up --build -d
 ```
 
-Keep this terminal open while using the local dashboard. No `npm install` is needed. Open **http://localhost:3000** on the computer running the server.
+Open **http://localhost:3000**. View backend logs with `docker compose logs -f`; stop the container with `docker compose down`. The named Docker volume keeps `.data` across container rebuilds.
 
-If PowerShell says `.env` already exists, skip the copy command. Set a private `DEVICE_API_KEY` in `.env` and use the same value in the ESP32 configuration.
+If PowerShell says `.env` already exists, skip the copy command. Compose uses development mode locally, so the example API key works for a local demo. Replace it with a private key before putting the backend on a public server.
+
+### Run directly with Node (optional)
+
+Install Node.js 18 or later. Copy `.env.example` to `.env` if needed, then run `npm start` from the project folder. Open **http://localhost:3000**.
 
 ### 2. Point the ESP32 at your computer
 
@@ -120,26 +124,29 @@ The starter thresholds match the supplied project code. The backend's `.env` val
 
 The MQ-2 value is an ADC count from **0 to 4095**, not ppm. MQ-2 modules vary and need warm-up and individual calibration. These are demo thresholds, not validated fire limits. Never test the system by lighting a fire.
 
-## Deploy publicly
+## Connect the Vercel site to a Docker backend
 
-The dashboard and API are served by the same Node.js process, so deploy the project as a Node app; Docker is not required. Choose a host that supports Node.js 18+, HTTPS, and persistent storage for the `.data` directory.
+The Node server serves the dashboard and API together. A Docker container on your own computer is private; the public Vercel site cannot reach it. For the deployed site, run this Docker image on a publicly reachable server that supports Docker, HTTPS, and persistent storage.
 
-1. Set `NODE_ENV=production`, a unique `DEVICE_API_KEY`, `PORT` if required by the host, and the thresholds in the host's environment settings:
+1. Build and start the image on your Docker host. Expose its `PORT` (3000 by default) and mount persistent storage at `/app/.data`.
+2. Set these environment variables on that host:
 
    ```text
+   NODE_ENV=production
+   PORT=3000
+   WEB_ORIGINS=https://gas-detection-gules.vercel.app
+   DEVICE_API_KEY=<your-private-random-key>
    TEMP_WARNING_C=30
    FIRE_TEMP_C=35
    SMOKE_WARNING_RAW=225
    SMOKE_RAW_THRESHOLD=300
    ```
 
-   The server refuses to start in production with the example demo key.
-2. Change the firmware `API_URL` to the hosted HTTPS endpoint ending in `/api/readings`.
-3. Add the hosting provider's trusted root CA certificate to `SERVER_ROOT_CA` in `Config.h`, then upload the firmware again. HTTPS requests are certificate-verified.
-4. Configure persistent storage for `.data`; the backend stores the latest reading and alert history there. Without persistent storage, a host restart may clear saved data.
-5. Keep `.env`, Wi-Fi credentials, and private API keys out of GitHub. `.gitignore` excludes `.env` and `.data`.
+3. Set `window.EMBERWATCH_API_BASE` in `public/config.js` to the backend's public origin, for example `https://your-backend.example.com`, and redeploy the Vercel site. Do not add `/api` to the origin; the dashboard appends API paths itself.
+4. Set the firmware `API_URL` to `https://your-backend.example.com/api/readings`, use the same `DEVICE_API_KEY`, add the host's trusted root certificate to `SERVER_ROOT_CA`, and upload the sketch again.
+5. Open `https://your-backend.example.com/api/health`. A JSON response confirms the API is running.
 
-For a remote setup, both the ESP32 and the hosted backend need internet access. Do not expose a development computer by forwarding its local server port through a router.
+The backend checks `WEB_ORIGINS` to allow browser requests from the Vercel site. Keep `.env`, Wi-Fi credentials, and private API keys out of GitHub. `.gitignore` excludes `.env` and `.data`.
 
 ## API
 
@@ -158,7 +165,8 @@ The firmware sends `POST /api/readings` with an `X-Device-Key` header. The dashb
 | Symptom | Check |
 | --- | --- |
 | ESP32 cannot find the network | Use a 2.4 GHz Wi-Fi network; verify the SSID exactly, and keep an iPhone hotspot's compatibility option enabled if using one. |
-| Wi-Fi connects, but the dashboard stays offline | Confirm the backend is running, the ESP32 and computer share a network, and `API_URL` uses the computer's current IPv4 address. |
+| Local dashboard stays offline | Confirm the Docker container is running with `docker compose ps` and open the dashboard at `http://localhost:3000`. |
+| Vercel dashboard stays offline | Confirm `public/config.js` points to the public backend origin and the backend's `WEB_ORIGINS` includes the exact Vercel site origin. |
 | API responds with an authorization error | Make `DEVICE_API_KEY` identical in the backend environment and `Config.h`. |
 | HTTP/TLS request fails after public deployment | Confirm `API_URL` uses HTTPS and `SERVER_ROOT_CA` contains the provider's trusted root CA certificate. |
 | DHT11 values show as unavailable | Check DATA wiring, power, common ground, and the selected DHT11 library. |

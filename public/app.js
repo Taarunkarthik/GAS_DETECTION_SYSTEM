@@ -1,5 +1,7 @@
 "use strict";
 
+const API_BASE = String(window.EMBERWATCH_API_BASE || "").replace(/\/+$/, "");
+const apiUrl = (path) => `${API_BASE}${path}`;
 const $ = (selector) => document.querySelector(selector);
 const chartCanvas = $("#trendChart");
 const chartEmpty = $("#chartEmpty");
@@ -417,7 +419,7 @@ function drawChart() {
 
 async function loadInitialData() {
   try {
-    const [stateResponse, historyResponse] = await Promise.all([fetch("/api/state", { cache: "no-store" }), fetch("/api/history", { cache: "no-store" })]);
+    const [stateResponse, historyResponse] = await Promise.all([fetch(apiUrl("/api/state"), { cache: "no-store" }), fetch(apiUrl("/api/history"), { cache: "no-store" })]);
     if (!stateResponse.ok || !historyResponse.ok) throw new Error("Dashboard API unavailable");
     const state = await stateResponse.json();
     const log = await historyResponse.json();
@@ -427,12 +429,12 @@ async function loadInitialData() {
     updateConnection(true, state.online, previousAlarmActive, Boolean(state.latest && state.latest.status === "WARNING"));
   } catch {
     updateConnection(false, false);
-    showToast("The dashboard could not reach its local backend. Start the Node.js server and refresh.");
+    showToast("The dashboard could not reach its API. Check the backend URL and CORS settings.");
   }
 }
 
 function connectLiveStream() {
-  const source = new EventSource("/api/stream");
+  const source = new EventSource(apiUrl("/api/stream"));
   source.addEventListener("snapshot", (message) => {
     try {
       applyState(JSON.parse(message.data));
@@ -449,10 +451,10 @@ function connectLiveStream() {
     } catch { /* Ignore malformed frames. */ }
   });
   source.addEventListener("alarm", () => {
-    fetch("/api/history", { cache: "no-store" }).then((response) => response.json()).then(applyHistory).catch(() => {});
+    fetch(apiUrl("/api/history"), { cache: "no-store" }).then((response) => response.json()).then(applyHistory).catch(() => {});
   });
   source.addEventListener("alarm-cleared", () => {
-    fetch("/api/history", { cache: "no-store" }).then((response) => response.json()).then(applyHistory).catch(() => {});
+    fetch(apiUrl("/api/history"), { cache: "no-store" }).then((response) => response.json()).then(applyHistory).catch(() => {});
   });
   source.onerror = () => updateConnection(false, false, Boolean(latestReading && latestReading.fire && latestReading.fire.active), Boolean(latestReading && latestReading.status === "WARNING"));
 }

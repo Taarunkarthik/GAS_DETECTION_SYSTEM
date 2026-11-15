@@ -65,11 +65,11 @@
       <section class="guide-section">
         <h2>Start the website and backend</h2>
         <ol>
-          <li>Install Node.js 18 or later. Open PowerShell in the project folder.</li>
-          <li>Copy <code>.env.example</code> to <code>.env</code>. For a classroom demo, the included development key can be used. Before hosting, set a long random <code>DEVICE_API_KEY</code> and copy the same value into <code>Config.h</code>.</li>
-          <li>Run <code>npm start</code>. No Docker and no npm packages are needed.</li>
-          <li>Open <code>http://localhost:3000</code> on the computer running the backend.</li>
-          <li>Find that computer's private IPv4 address with <code>ipconfig</code>. On Windows, allow Node.js on your private network if the firewall asks.</li>
+          <li>Install and start Docker Desktop, then open PowerShell in the project folder.</li>
+          <li>Copy <code>.env.example</code> to <code>.env</code> if needed.</li>
+          <li>Run <code>docker compose up --build -d</code> to build and start the backend container.</li>
+          <li>Open <code>http://localhost:3000</code>. View logs with <code>docker compose logs -f</code>; stop it with <code>docker compose down</code>.</li>
+          <li>For ESP32 local testing, find the computer's private IPv4 address with <code>ipconfig</code>. On Windows, allow Docker Desktop through the private network firewall if prompted.</li>
         </ol>
       </section>
 
@@ -93,7 +93,7 @@
 
       <section class="guide-section">
         <h2>Using it away from your Wi-Fi</h2>
-        <p>For a remote dashboard, host this Node.js app on a Node-capable service that provides HTTPS. Set the environment variables there, then change <code>API_URL</code> to the hosted <code>https://…/api/readings</code> endpoint and add the host's trusted root certificate to <code>SERVER_ROOT_CA</code>. The sketch verifies TLS certificates; it does not disable verification. Do not expose the local Node port through your home router.</p>
+        <p>A Docker container on your own computer is not publicly reachable. The Vercel site needs the container on a public server with HTTPS. Set <code>WEB_ORIGINS</code> to the exact Vercel origin, set <code>window.EMBERWATCH_API_BASE</code> in <code>public/config.js</code> to the backend origin, and set the ESP32 <code>API_URL</code> to the backend's <code>/api/readings</code> endpoint. Add the trusted root certificate to <code>SERVER_ROOT_CA</code>; the firmware verifies HTTPS certificates. Avoid exposing a development computer by forwarding its local port through a home router.</p>
       </section>
       <p class="guide-footer">The Arduino sketch contains more than five user-defined functions and a custom <code>Config.h</code>, as required by the project topic sheet. For a real building, install and maintain certified, code-compliant fire alarm equipment.</p>
     </main>

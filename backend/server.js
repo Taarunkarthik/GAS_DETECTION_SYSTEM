@@ -18,6 +18,12 @@ const MAX_ALERTS = 80;
 loadEnvFile();
 
 const PORT = Number(process.env.PORT || 3000);
+const WEB_ORIGINS = new Set(
+  (process.env.WEB_ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/+$/, ""))
+    .filter(Boolean)
+);
 const DEVICE_API_KEY = process.env.DEVICE_API_KEY || "demo-key-change-before-deployment";
 const TEMP_WARNING_C = Number(process.env.TEMP_WARNING_C || 30);
 const TEMP_THRESHOLD_C = Number(process.env.FIRE_TEMP_C || 35);
@@ -317,7 +323,21 @@ const server = http.createServer(async (request, response) => {
   const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
   const pathname = url.pathname;
 
+  const origin = request.headers.origin;
+  if (origin && WEB_ORIGINS.has(origin.replace(/\/+$/, ""))) {
+    response.setHeader("Access-Control-Allow-Origin", origin);
+    response.setHeader("Vary", "Origin");
+    response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    response.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Device-Key");
+    response.setHeader("Access-Control-Max-Age", "86400");
+  }
+
   try {
+    if (request.method === "OPTIONS") {
+      response.writeHead(204);
+      response.end();
+      return;
+    }
     if (request.method === "GET" && pathname === "/api/health") {
       sendJson(response, 200, { ok: true, online: isDeviceOnline(), latestAt: latest ? latest.receivedAt : null });
       return;
