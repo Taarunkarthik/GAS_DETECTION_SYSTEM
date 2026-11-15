@@ -97,11 +97,11 @@ Find the computer's current Wi-Fi IPv4 address with `ipconfig`. In `firmware/esp
 ```cpp
 #define WIFI_SSID "your-2.4-GHz-network"
 #define WIFI_PASSWORD "your-wifi-password"
-#define API_URL "http://YOUR_COMPUTER_IPV4:3000/api/readings"
+#define API_URL "http://YOUR_COMPUTER_IPV4:3001/api/readings"
 #define DEVICE_API_KEY "the-same-private-key-as-in-.env"
 ```
 
-Replace `YOUR_COMPUTER_IPV4` with the computer's address on the same Wi-Fi network, for example `192.168.1.25`. Do not use `localhost` here: from the ESP32, that would refer to the ESP32 itself. If Windows Firewall asks, allow Node.js on your private network.
+Replace `YOUR_COMPUTER_IPV4` with the computer's address on the same Wi-Fi network, for example `192.168.1.25`. Docker Compose maps host port `3001` to container port `3000`. Do not use `localhost` here: from the ESP32, that would refer to the ESP32 itself. If Windows Firewall asks, allow Docker Desktop on your private network.
 
 ### 3. Upload the firmware
 
