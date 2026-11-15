@@ -82,7 +82,7 @@ Copy-Item .env.example .env  # only needed the first time
 docker compose up --build -d
 ```
 
-Open **http://localhost:3000**. View backend logs with `docker compose logs -f`; stop the container with `docker compose down`. The named Docker volume keeps `.data` across container rebuilds.
+Open **http://localhost:3001**. Docker maps host port 3001 to the app's container port 3000, leaving 3000 available for a backend already running directly from VS Code. View logs with `docker compose logs -f`; stop the container with `docker compose down`. The named Docker volume keeps `.data` across container rebuilds.
 
 If PowerShell says `.env` already exists, skip the copy command. Compose uses development mode locally, so the example API key works for a local demo. Replace it with a private key before putting the backend on a public server.
 
@@ -148,6 +148,8 @@ The Node server serves the dashboard and API together. A Docker container on you
 
 The backend checks `WEB_ORIGINS` to allow browser requests from the Vercel site. Keep `.env`, Wi-Fi credentials, and private API keys out of GitHub. `.gitignore` excludes `.env` and `.data`.
 
+For a temporary demo without a separate backend host, Compose includes an optional Cloudflare Quick Tunnel. Start it with `docker compose --profile public-tunnel up -d` and read the generated `trycloudflare.com` URL using `docker compose logs public-tunnel`. Put that URL in `public/config.js` and redeploy Vercel. Quick Tunnel addresses change when restarted and do not support SSE, so the frontend uses polling in this mode. Keep Docker and the tunnel running. This is for demonstrations, not a permanent public deployment.
+
 ## API
 
 The firmware sends `POST /api/readings` with an `X-Device-Key` header. The dashboard uses the following endpoints:
@@ -165,7 +167,7 @@ The firmware sends `POST /api/readings` with an `X-Device-Key` header. The dashb
 | Symptom | Check |
 | --- | --- |
 | ESP32 cannot find the network | Use a 2.4 GHz Wi-Fi network; verify the SSID exactly, and keep an iPhone hotspot's compatibility option enabled if using one. |
-| Local dashboard stays offline | Confirm the Docker container is running with `docker compose ps` and open the dashboard at `http://localhost:3000`. |
+| Local Docker dashboard stays offline | Confirm the container is running with `docker compose ps` and open `http://localhost:3001`. |
 | Vercel dashboard stays offline | Confirm `public/config.js` points to the public backend origin and the backend's `WEB_ORIGINS` includes the exact Vercel site origin. |
 | API responds with an authorization error | Make `DEVICE_API_KEY` identical in the backend environment and `Config.h`. |
 | HTTP/TLS request fails after public deployment | Confirm `API_URL` uses HTTPS and `SERVER_ROOT_CA` contains the provider's trusted root CA certificate. |

@@ -2,7 +2,7 @@ services:
   emberwatch:
     build: .
     ports:
-      - "3000:3000"
+      - "3001:3000"
     env_file:
       - .env
     environment:
@@ -10,6 +10,15 @@ services:
       PORT: "3000"
     volumes:
       - emberwatch-data:/app/.data
+
+  public-tunnel:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate --url http://emberwatch:3000
+    depends_on:
+      - emberwatch
+    restart: unless-stopped
+    profiles:
+      - public-tunnel
 
 volumes:
   emberwatch-data:

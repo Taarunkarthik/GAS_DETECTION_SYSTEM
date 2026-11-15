@@ -433,6 +433,27 @@ async function loadInitialData() {
   }
 }
 
+function startPolling() {
+  loadInitialData();
+  const intervalMs = Math.max(1500, Number(window.EMBERWATCH_POLL_INTERVAL_MS) || 2500);
+  window.setInterval(async () => {
+    try {
+      const [stateResponse, historyResponse] = await Promise.all([
+        fetch(apiUrl("/api/state"), { cache: "no-store" }),
+        fetch(apiUrl("/api/history"), { cache: "no-store" }),
+      ]);
+      if (!stateResponse.ok || !historyResponse.ok) throw new Error("Dashboard API unavailable");
+      const [state, log] = await Promise.all([stateResponse.json(), historyResponse.json()]);
+      applyHistory(log);
+      applyState(state);
+      previousAlarmActive = Boolean(state.latest && state.latest.fire && state.latest.fire.active);
+      updateConnection(true, state.online, previousAlarmActive, Boolean(state.latest && state.latest.status === "WARNING"));
+    } catch {
+      updateConnection(false, false);
+    }
+  }, intervalMs);
+}
+
 function connectLiveStream() {
   const source = new EventSource(apiUrl("/api/stream"));
   source.addEventListener("snapshot", (message) => {
@@ -469,8 +490,12 @@ window.addEventListener("keydown", (event) => {
 window.addEventListener("focus", () => { if (latestReading) drawChart(); });
 
 greeting();
-loadInitialData();
-connectLiveStream();
+if (window.EMBERWATCH_POLLING) {
+  startPolling();
+} else {
+  loadInitialData();
+  connectLiveStream();
+}
 window.setInterval(() => {
   if (!latestReading) return;
   const online = Date.now() - Date.parse(latestReading.receivedAt) <= 10_000;
