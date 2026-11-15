@@ -63,6 +63,7 @@ function setHero(state, online) {
   const warning = Boolean(current && current.status === "WARNING");
   document.body.classList.toggle("alarm-on", active);
   document.body.classList.toggle("warning-on", warning && !active);
+  document.body.classList.toggle("device-online", online);
   updateConnection(true, online, active, warning);
 
   if (!current) {
@@ -82,8 +83,8 @@ function setHero(state, online) {
     $("#smokeValue").textContent = "--";
     $("#temperatureState").textContent = "Awaiting reading";
     $("#smokeState").textContent = "Awaiting reading";
-    $("#temperatureState").className = "metric-state state-muted";
-    $("#smokeState").className = "metric-state state-muted";
+    $("#temperatureState").className = "sensor-state state-muted";
+    $("#smokeState").className = "sensor-state state-muted";
     maybeResolveAlert(false, null);
     return;
   }
@@ -120,12 +121,21 @@ function setHero(state, online) {
   $("#temperatureValue").textContent = formatTemperature(current.temperatureC);
   $("#smokeValue").textContent = Number(current.smokeRaw).toLocaleString();
 
+  const temperatureMarker = $(".scale-fill");
+  if (temperatureMarker) {
+    const markerValue = Number(current.temperatureC);
+    const markerPercent = Number.isFinite(markerValue) ? Math.max(2, Math.min(98, markerValue / 60 * 100)) : 2;
+    temperatureMarker.style.left = String(markerPercent) + "%";
+    temperatureMarker.classList.toggle("warning", temperatureWarning && !temperatureCritical);
+    temperatureMarker.classList.toggle("critical", temperatureCritical);
+  }
+
   const tempState = $("#temperatureState");
   tempState.textContent = current.temperatureC === null ? "Sensor unavailable" : temperatureCritical ? "Critical" : temperatureWarning ? "Warning" : "Within range";
-  tempState.className = `metric-state ${current.temperatureC === null ? "state-muted" : temperatureCritical ? "state-alert" : temperatureWarning ? "state-warning" : "state-normal"}`;
+  tempState.className = `sensor-state ${current.temperatureC === null ? "state-muted" : temperatureCritical ? "state-alert" : temperatureWarning ? "state-warning" : "state-normal"}`;
   const smokeState = $("#smokeState");
   smokeState.textContent = !current.smokeSensorOk ? "Check sensor input" : smokeCritical ? "Critical" : smokeWarning ? "Warning" : "Within range";
-  smokeState.className = `metric-state ${!current.smokeSensorOk ? "state-muted" : smokeCritical ? "state-alert" : smokeWarning ? "state-warning" : "state-normal"}`;
+  smokeState.className = `sensor-state ${!current.smokeSensorOk ? "state-muted" : smokeCritical ? "state-alert" : smokeWarning ? "state-warning" : "state-normal"}`;
 
   if (active) {
     const fire = current.fire;
@@ -338,20 +348,20 @@ function drawChart() {
   const smokeY = (value) => bottom - (Math.max(0, Math.min(100, value)) / 100) * plotHeight;
 
   context.lineWidth = 1;
-  context.font = '8px "DM Mono", Consolas, monospace';
+  context.font = '8px "IBM Plex Mono", Consolas, monospace';
   context.textBaseline = "middle";
   for (let step = 0; step <= 4; step += 1) {
     const y = top + (step / 4) * plotHeight;
     const tempLabel = String(80 - step * 20);
     const smokeLabel = String(100 - step * 25);
-    context.strokeStyle = "rgba(143, 160, 190, .105)";
+    context.strokeStyle = "rgba(60, 54, 44, .13)";
     context.setLineDash(step === 4 ? [] : [2, 5]);
     context.beginPath();
     context.moveTo(inset.left, y);
     context.lineTo(width - inset.right, y);
     context.stroke();
     context.setLineDash([]);
-    context.fillStyle = "#626e83";
+    context.fillStyle = "#8a8377";
     context.textAlign = "right";
     context.fillText(tempLabel, inset.left - 8, y);
     context.textAlign = "left";
@@ -359,7 +369,7 @@ function drawChart() {
   }
   for (let step = 0; step <= 4; step += 1) {
     const px = inset.left + (step / 4) * plotWidth;
-    context.strokeStyle = "rgba(143, 160, 190, .07)";
+    context.strokeStyle = "rgba(60, 54, 44, .08)";
     context.setLineDash([2, 6]);
     context.beginPath();
     context.moveTo(px, top);
@@ -375,8 +385,8 @@ function drawChart() {
     context.moveTo(points[0].x, points[0].y);
     for (let index = 1; index < points.length; index += 1) context.lineTo(points[index].x, points[index].y);
     const gradient = context.createLinearGradient(0, top, 0, bottom);
-    gradient.addColorStop(0, "rgba(240, 163, 107, .2)");
-    gradient.addColorStop(1, "rgba(240, 163, 107, 0)");
+    gradient.addColorStop(0, "rgba(217, 93, 62, .19)");
+    gradient.addColorStop(1, "rgba(217, 93, 62, 0)");
     context.lineTo(points[points.length - 1].x, bottom);
     context.lineTo(points[0].x, bottom);
     context.closePath();
@@ -387,8 +397,8 @@ function drawChart() {
     context.lineWidth = 1.8;
     context.lineJoin = "round";
     context.lineCap = "round";
-    context.strokeStyle = "#f0a36b";
-    context.shadowColor = "rgba(240, 163, 107, .25)";
+    context.strokeStyle = "#d95d3e";
+    context.shadowColor = "rgba(217, 93, 62, .25)";
     context.shadowBlur = 6;
     context.stroke();
     context.shadowBlur = 0;
@@ -405,8 +415,8 @@ function drawChart() {
     context.lineWidth = 1.5;
     context.lineJoin = "round";
     context.lineCap = "round";
-    context.strokeStyle = "#50d7bd";
-    context.shadowColor = "rgba(80, 215, 189, .24)";
+    context.strokeStyle = "#208779";
+    context.shadowColor = "rgba(32, 135, 121, .22)";
     context.shadowBlur = 5;
     context.stroke();
     context.shadowBlur = 0;

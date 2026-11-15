@@ -3,156 +3,208 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#090d18">
-    <meta name="description" content="Live monitoring for the Smart Fire Detection and Alert System.">
-    <title>Emberwatch · Fire safety console</title>
+    <meta name="theme-color" content="#eeeae1">
+    <meta name="description" content="A live fire-monitoring console for the Emberwatch ESP32 sensor system.">
+    <title>Emberwatch — Field Console</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/dashboard.css">
     <script src="/config.js" defer></script>
     <script src="/app.js" defer></script>
   </head>
   <body>
-    <div class="app-shell">
-      <aside class="sidebar" aria-label="Main navigation">
-        <a class="brand" href="#overview" aria-label="Emberwatch home">
-          <span class="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 40 40" fill="none"><path d="M21.7 4.5c1.5 7.2-3.5 8.8-1.5 13.5 1.2-2 2.6-3 4.4-3.7 5.1 4.5 7.2 8.2 6 13.2-1.1 5-5.3 8-10.8 8-6.3 0-10.8-4.1-10.8-10.1 0-4.7 2.4-8.6 7-12.7-.4 4.1 1 5.8 2.2 6.8C16.6 13 19.8 10.2 21.7 4.5Z" fill="currentColor"/><path d="M20.1 25.1c2.8 2.9 3.7 4.4 3.1 6.2-.5 1.5-1.7 2.4-3.3 2.4-1.9 0-3.1-1.3-3.1-3.1 0-1.8 1-3.4 3.3-5.5Z" fill="#0b1020"/></svg>
-          </span>
-          <span class="brand-name">ember<span>watch</span></span>
+    <div class="paper-grain" aria-hidden="true"></div>
+    <div class="app-frame">
+      <aside class="rail" aria-label="Main navigation">
+        <a class="brand-mark" href="#overview" aria-label="Emberwatch home">
+          <svg viewBox="0 0 36 42" fill="none" aria-hidden="true">
+            <path d="M19.9 3.4c1.6 7.8-3.7 9.5-1.6 14.6 1.3-2.2 2.8-3.3 4.8-4 5.5 4.8 7.8 8.9 6.5 14.3-1.2 5.4-5.8 8.7-11.7 8.7-6.8 0-11.7-4.4-11.7-11 0-5.1 2.6-9.3 7.6-13.7-.4 4.4 1.1 6.3 2.4 7.4-1.7-7.1 1.7-10.1 3.7-16.3Z" fill="currentColor"/>
+            <path d="M18 24.5c3 3.1 4 4.8 3.4 6.7-.5 1.7-1.8 2.6-3.6 2.6-2.1 0-3.4-1.4-3.4-3.4 0-2 1.1-3.7 3.6-5.9Z" fill="#171916"/>
+          </svg>
+          <span>EW</span>
         </a>
 
-        <div class="workspace-label">WORKSPACE</div>
-        <div class="workspace-card">
-          <span class="workspace-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 10.8 12 4l9 6.8V20H3v-9.2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 20v-6h6v6" stroke="currentColor" stroke-width="1.5"/></svg></span>
-          <span class="workspace-copy"><strong>Fire safety lab</strong><small>Personal workspace</small></span>
-          <span class="workspace-menu" aria-hidden="true">···</span>
-        </div>
-
-        <div class="nav-label">MONITOR</div>
-        <nav class="side-nav">
-          <a class="nav-link active" href="#overview"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg></span>Overview</a>
-          <a class="nav-link" href="#activity"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 18.5V13m5 5.5V8m5 10.5v-7m5 7V5.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M3 21h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Activity</a>
-          <a class="nav-link" href="#device"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="3.5" width="14" height="17" rx="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M9 7h6m-6 3h6m-6 3h3m-3 4h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>Device</a>
+        <div class="rail-station"><span>FIELD</span><b>01</b></div>
+        <nav class="rail-nav">
+          <a class="rail-link active" href="#overview" aria-label="Overview" title="Overview">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+            <span>Overview</span>
+          </a>
+          <a class="rail-link" href="#activity" aria-label="Activity log" title="Activity log">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18.5V13m5 5.5V8m5 10.5v-7m5 7V5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3 21h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>Activity</span>
+          </a>
+          <a class="rail-link" href="#device" aria-label="Device status" title="Device status">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M9 7h6m-6 3h6m-6 3h3m-3 4h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>Device</span>
+          </a>
         </nav>
 
-        <div class="sidebar-bottom">
-          <div class="sidebar-help">
-            <div class="help-orbit"><svg viewBox="0 0 24 24" fill="none"><path d="M12 17v.01M9.1 9a3 3 0 1 1 5.5 1.7c-.9 1.1-2.6 1.5-2.6 3.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.4"/></svg></div>
-            <strong>Need a hand?</strong>
-            <p>See the wiring and setup guide.</p>
-            <a href="#setup">Open setup guide <span>↗</span></a>
-          </div>
-          <div class="profile-row"><div class="profile-avatar">FL</div><div class="profile-copy"><strong>Fire lab</strong><small>ESP32 project</small></div><span class="profile-more">···</span></div>
+        <div class="rail-bottom">
+          <a class="rail-link rail-help" href="/setup.html" aria-label="Setup guide" title="Setup guide">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M9.2 9a2.9 2.9 0 1 1 5.3 1.7c-.9 1-2.5 1.4-2.5 3.1M12 17v.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>Guide</span>
+          </a>
+          <div class="rail-avatar" aria-label="Fire lab project">FL</div>
         </div>
       </aside>
 
       <main class="main-content" id="overview">
-        <header class="topbar">
-          <div class="breadcrumbs"><span>Workspace</span><i>/</i><strong>Overview</strong></div>
-          <div class="topbar-actions">
-            <div class="live-indicator" id="connectionPill"><span class="live-dot"></span><span id="connectionText">Connecting</span></div>
-            <button class="icon-button notification-button" id="enableAlerts" type="button" aria-label="Enable desktop notifications" title="Enable desktop notifications"><svg viewBox="0 0 24 24" fill="none"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="notification-dot"></span></button>
-            <div class="topbar-divider"></div>
-            <div class="topbar-avatar">FL</div>
+        <header class="masthead">
+          <div class="masthead-mark"><span class="mark-line"></span>EMBERWATCH <span class="slash">/</span> FIELD CONSOLE</div>
+          <div class="masthead-right">
+            <span class="date-stamp" id="todayLabel">FIELD REPORT</span>
+            <div class="connection-pill is-offline" id="connectionPill"><span class="connection-lamp"></span><span id="connectionText">Connecting</span></div>
+            <button class="icon-button" id="enableAlerts" type="button" aria-label="Enable desktop notifications" title="Enable desktop notifications">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span class="notification-dot"></span>
+            </button>
           </div>
         </header>
 
-        <div class="content-wrap">
-          <section class="page-heading">
+        <div class="dashboard-content">
+          <section class="intro-row">
             <div>
-              <div class="eyebrow"><span class="eyebrow-line"></span>SAFETY CONSOLE <span class="eyebrow-date" id="todayLabel"></span></div>
-              <h1>Good <span id="greetingTime">day</span>, Fire lab<span class="heading-period">.</span></h1>
-              <p class="heading-subtitle">Your space, watched in real time.</p>
+              <div class="section-tag"><span class="tag-index">01</span> SENSOR WATCH <i></i><span id="greetingTime">TODAY</span></div>
+              <h1>Read the room.<br><em>Before it changes.</em></h1>
+              <p class="intro-copy">A quiet eye on heat, smoke, and the signals that matter.</p>
             </div>
-            <button class="button button-outline" id="enableAlertsSecondary" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="alertsButtonText">Enable alerts</span></button>
+            <button class="notify-action" id="enableAlertsSecondary" type="button" aria-label="Enable browser notifications and sound">
+              <span class="notify-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span><b id="alertsButtonText">Enable browser alerts</b><small>Sound + desktop notification</small></span>
+              <span class="notify-arrow">↗</span>
+            </button>
           </section>
 
-          <section class="hero-card" aria-live="polite">
-            <div class="hero-grain"></div>
-            <div class="hero-topline"><span class="hero-kicker"><span class="tiny-spark"></span>LIVE PROTECTION</span><span class="hero-updated" id="lastUpdated">Waiting for your ESP32</span></div>
-            <div class="hero-main">
-              <div class="hero-status-copy">
-                <div class="status-overline" id="heroOverline">SYSTEM STANDING BY</div>
-                <h2 id="heroTitle">Your watch starts<br>when your device connects.</h2>
-                <p id="heroDescription">Bring your ESP32 online to stream live sensor readings to this dashboard.</p>
-                <div class="hero-meta-row"><span class="hero-meta"><span class="meta-check">✓</span><span id="thresholdSummary">Warn 30°C / fire 35°C · smoke 225 / 300 ADC</span></span><span class="hero-meta-divider"></span><span class="hero-meta" id="deviceMeta">Device: ESP32 fire monitor</span></div>
+          <section class="watch-panel" aria-live="off">
+            <div class="watch-grid" aria-hidden="true"></div>
+            <div class="watch-head">
+              <div class="watch-mark"><span class="pulse-mark"></span> LIVE WATCH <span class="watch-rule"></span> STATION 01</div>
+              <div class="last-updated" id="lastUpdated">Waiting for ESP32 signal</div>
+            </div>
+            <div class="watch-body">
+              <div class="watch-message">
+                <div class="watch-overline" id="heroOverline">SYSTEM STANDING BY</div>
+                <h2 id="heroTitle">Your watch begins<br>when the signal arrives.</h2>
+                <p id="heroDescription">Connect the ESP32 to stream live readings into the field console.</p>
+                <div class="watch-details">
+                  <span class="threshold-note"><span class="detail-icon">⌁</span><span id="thresholdSummary">Warn 30°C / fire 35°C · smoke 225 / 300 ADC</span></span>
+                  <span class="detail-divider"></span>
+                  <span id="deviceMeta">Device: ESP32 fire monitor</span>
+                </div>
               </div>
-              <div class="hero-visual" aria-hidden="true">
-                <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div>
-                <div class="hero-ring"><div class="hero-core"><svg viewBox="0 0 64 64" fill="none"><path d="M35 7c2 10-5 12-3 19 1.7-2.8 3.7-4.2 6.2-5.2 7 6.2 9.8 11.4 8.2 18.3-1.6 6.9-7.4 11.1-15 11.1-8.7 0-15-5.7-15-14 0-6.5 3.3-11.9 9.7-17.6-.6 5.7 1.4 8.1 3 9.5C27.9 18.8 32.3 14.9 35 7Z" fill="currentColor"/><path d="M31.9 35.5c3.8 4 5 6.1 4.2 8.6-.7 2.1-2.4 3.3-4.5 3.3-2.6 0-4.2-1.8-4.2-4.3 0-2.5 1.4-4.7 4.5-7.6Z" fill="#17131a"/></svg></div></div>
-                <span class="visual-satellite sat-one"></span><span class="visual-satellite sat-two"></span><span class="visual-satellite sat-three"></span>
-                <div class="visual-caption"><span class="visual-caption-dot"></span><span id="visualCaption">SENSORS ON STANDBY</span></div>
+
+              <div class="radar" aria-hidden="true">
+                <div class="radar-axis radar-axis-x"></div>
+                <div class="radar-axis radar-axis-y"></div>
+                <div class="radar-circle radar-circle-outer"></div>
+                <div class="radar-circle radar-circle-mid"></div>
+                <div class="radar-circle radar-circle-inner"></div>
+                <div class="radar-sweep"></div>
+                <span class="radar-node node-a"></span><span class="radar-node node-b"></span><span class="radar-node node-c"></span>
+                <div class="radar-center"><svg viewBox="0 0 36 42" fill="none"><path d="M19.9 3.4c1.6 7.8-3.7 9.5-1.6 14.6 1.3-2.2 2.8-3.3 4.8-4 5.5 4.8 7.8 8.9 6.5 14.3-1.2 5.4-5.8 8.7-11.7 8.7-6.8 0-11.7-4.4-11.7-11 0-5.1 2.6-9.3 7.6-13.7-.4 4.4 1.1 6.3 2.4 7.4-1.7-7.1 1.7-10.1 3.7-16.3Z" fill="currentColor"/></svg></div>
+                <div class="radar-caption"><span class="radar-caption-dot"></span><span id="visualCaption">SENSORS ON STANDBY</span></div>
+                <span class="radar-coordinate coordinate-top">ZONE / 01</span>
+                <span class="radar-coordinate coordinate-side">RANGE / LOCAL</span>
               </div>
             </div>
-            <div class="hero-bottom"><div class="hero-bottom-left"><span class="hero-shield"><svg viewBox="0 0 20 20" fill="none"><path d="M10 2.5 16 5v4.2c0 4-2.6 6.7-6 8.3-3.4-1.6-6-4.3-6-8.3V5l6-2.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="m7.2 9.6 1.8 1.8 3.8-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Continuous monitoring <b>·</b> Instant local alarm <b>·</b> Live dashboard</span></div><div class="hero-mode"><span></span>MONITORING MODE</div></div>
+            <div class="watch-foot">
+              <span><b class="foot-check">✓</b> LOCAL ALARM <i></i> LIVE TELEMETRY <i></i> CONTINUOUS SCAN</span>
+              <span class="watch-foot-right"><span class="foot-indicator"></span> ESP32 FIELD MODE</span>
+            </div>
           </section>
 
-          <section class="metrics-grid" aria-label="Current sensor readings">
-            <article class="metric-card temperature-card">
-              <div class="metric-top"><span class="metric-icon temperature-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M14 14.8V5a3 3 0 0 0-6 0v9.8a5 5 0 1 0 6 0Z" stroke="currentColor" stroke-width="1.5"/><path d="M11 6v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span class="metric-more" aria-hidden="true">···</span></div>
-              <div class="metric-label">TEMPERATURE</div>
-              <div class="metric-value"><span id="temperatureValue">--</span><span class="metric-unit">°C</span></div>
-              <div class="metric-foot"><span class="metric-state state-muted" id="temperatureState">Awaiting reading</span><span class="metric-limit">Warn / fire <b id="temperatureLimit">30° / 35°C</b></span></div>
-              <div class="metric-spark spark-amber" aria-hidden="true"><svg viewBox="0 0 300 34" preserveAspectRatio="none"><path class="spark-fill" d="M0 26 30 22 55 24 82 15 110 20 138 11 166 18 198 7 225 13 252 6 278 12 300 4v30H0Z"/><path class="spark-line" d="M0 26 30 22 55 24 82 15 110 20 138 11 166 18 198 7 225 13 252 6 278 12 300 4"/></svg></div>
+          <section class="section-heading sensor-heading" aria-label="Current readings">
+            <div><span class="section-number">02 /</span><h2>Sensor field</h2><p>Latest signal from your environment</p></div>
+            <div class="scan-caption"><span class="scan-bars"><i></i><i></i><i></i></span> AUTO-SCAN <b>02 SEC</b></div>
+          </section>
+
+          <section class="sensor-grid">
+            <article class="sensor-card temperature-card">
+              <div class="sensor-card-head">
+                <span class="sensor-symbol temp-symbol"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 14.8V5a3 3 0 0 0-6 0v9.8a5 5 0 1 0 6 0Z" stroke="currentColor" stroke-width="1.6"/><path d="M11 6v10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+                <span class="sensor-index">THERMAL / 01</span>
+                <span class="sensor-live-dot"></span>
+              </div>
+              <div class="sensor-title">Ambient temperature</div>
+              <div class="sensor-reading"><span id="temperatureValue">--</span><small>°C</small></div>
+              <div class="temp-scale"><span class="scale-fill"></span><span class="scale-tick tick-warn"></span><span class="scale-tick tick-fire"></span><span class="scale-label label-start">0°</span><span class="scale-label label-warning">30°</span><span class="scale-label label-critical">35°</span><span class="scale-label label-end">60°</span></div>
+              <div class="sensor-bottom"><span class="sensor-state state-muted" id="temperatureState">Awaiting reading</span><span class="limit-label">WARN / FIRE <b id="temperatureLimit">30° / 35°C</b></span></div>
             </article>
 
-            <article class="metric-card smoke-card">
-              <div class="metric-top"><span class="metric-icon smoke-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M7 18h10.3a3.7 3.7 0 0 0 .2-7.4 5.5 5.5 0 0 0-10.4-1.3A4.4 4.4 0 0 0 7 18Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 20.5c0-.8.7-1.2.7-2m4.2 2c0-.8.7-1.2.7-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span><span class="metric-more" aria-hidden="true">···</span></div>
-              <div class="metric-label">SMOKE SENSOR · ADC</div>
-              <div class="metric-value"><span id="smokeValue">--</span><span class="metric-unit">/ 4095</span></div>
-              <div class="metric-foot"><span class="metric-state state-muted" id="smokeState">Awaiting reading</span><span class="metric-limit">Warn / fire <b id="smokeLimit">225 / 300</b></span></div>
-              <div class="metric-spark spark-teal" aria-hidden="true"><svg viewBox="0 0 300 34" preserveAspectRatio="none"><path class="spark-fill" d="M0 25 25 25 50 21 75 25 100 18 130 21 154 12 178 18 205 11 230 16 254 5 280 10 300 3v31H0Z"/><path class="spark-line" d="M0 25 25 25 50 21 75 25 100 18 130 21 154 12 178 18 205 11 230 16 254 5 280 10 300 3"/></svg></div>
+            <article class="sensor-card smoke-card">
+              <div class="sensor-card-head">
+                <span class="sensor-symbol smoke-symbol"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 18h10.3a3.7 3.7 0 0 0 .2-7.4 5.5 5.5 0 0 0-10.4-1.3A4.4 4.4 0 0 0 7 18Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 20.5c0-.8.7-1.2.7-2m4.2 2c0-.8.7-1.2.7-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+                <span class="sensor-index">PARTICLE / 02</span>
+                <span class="sensor-live-dot"></span>
+              </div>
+              <div class="sensor-title">Smoke sensor signal</div>
+              <div class="sensor-reading"><span id="smokeValue">--</span><small class="adc-unit">ADC <i>/ 4095</i></small></div>
+              <div class="smoke-scale" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="sensor-bottom"><span class="sensor-state state-muted" id="smokeState">Awaiting reading</span><span class="limit-label">WARN / FIRE <b id="smokeLimit">225 / 300</b></span></div>
             </article>
 
-            <article class="metric-card device-card" id="device">
-              <div class="metric-top"><span class="metric-icon device-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="3.5" width="14" height="17" rx="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M9 7h6m-6 3h6m-6 3h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="17" r=".8" fill="currentColor"/></svg></span><span class="metric-more" aria-hidden="true">···</span></div>
-              <div class="metric-label">DEVICE LINK</div>
-              <div class="device-link-line"><span class="device-status-dot" id="deviceStatusDot"></span><span id="deviceState">Not connected</span></div>
+            <article class="sensor-card device-card" id="device">
+              <div class="sensor-card-head">
+                <span class="sensor-symbol device-symbol"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M9 7h6m-6 3h6m-6 3h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="17" r=".8" fill="currentColor"/></svg></span>
+                <span class="sensor-index">UPLINK / 03</span>
+                <span class="sensor-live-dot"></span>
+              </div>
+              <div class="device-primary"><span class="device-status-dot" id="deviceStatusDot"></span><strong id="deviceState">Not connected</strong></div>
               <div class="device-caption" id="deviceCaption">Waiting for first heartbeat</div>
-              <div class="device-details"><span>Wi-Fi signal</span><b id="wifiValue">-- dBm</b></div>
-              <div class="device-details"><span>Humidity</span><b id="humidityValue">--%</b></div>
-              <div class="device-details"><span>Last heartbeat</span><b id="heartbeatValue">--</b></div>
-              <div class="device-progress"><span id="deviceProgress"></span></div>
+              <div class="device-readout"><span>Wi-Fi signal</span><b id="wifiValue">-- dBm</b></div>
+              <div class="device-readout"><span>Relative humidity</span><b id="humidityValue">--%</b></div>
+              <div class="device-readout"><span>Last heartbeat</span><b id="heartbeatValue">--</b></div>
+              <div class="uplink-track"><span id="deviceProgress"></span></div>
             </article>
+          </section>
+
+          <section class="section-heading activity-title">
+            <div><span class="section-number">03 /</span><h2>Signal history</h2><p>Trace the pattern, not just the moment</p></div>
+            <div class="history-note"><span class="history-dot"></span> LIVE DATA <span class="history-separator">/</span> <span id="chartCount">0 samples</span></div>
           </section>
 
           <section class="lower-grid">
-            <article class="panel chart-panel" id="activity">
-              <div class="panel-heading"><div><div class="panel-eyebrow">SENSOR TELEMETRY</div><h3>Live readings</h3><p>Temperature and smoke sensor signal over time.</p></div><div class="chart-range"><span class="range-dot"></span>Live <span class="range-divider"></span><span id="chartCount">0 samples</span></div></div>
-              <div class="chart-legend"><span><i class="legend-line legend-temperature"></i>Temperature <b>°C</b></span><span><i class="legend-line legend-smoke"></i>Smoke signal <b>ADC %</b></span></div>
-              <div class="chart-wrap"><canvas id="trendChart" aria-label="Live line chart of temperature and smoke sensor readings"></canvas><div class="chart-empty" id="chartEmpty"><span class="empty-pulse"></span><strong>Waiting for sensor data</strong><small>Readings appear here as soon as your ESP32 connects.</small></div></div>
-              <div class="chart-x-labels"><span id="chartStart">--:--</span><span>LAST 12 MINUTES</span><span id="chartEnd">--:--</span></div>
+            <article class="data-panel chart-panel" id="activity">
+              <div class="panel-top">
+                <div><span class="panel-label">TELEMETRY PLOT <span>·</span> LAST 12 MINUTES</span><h3>Readings over time</h3></div>
+                <div class="chart-legend"><span><i class="legend-temperature"></i>Temperature <b>°C</b></span><span><i class="legend-smoke"></i>Smoke <b>ADC %</b></span></div>
+              </div>
+              <div class="chart-wrap"><canvas id="trendChart" aria-label="Live line chart of temperature and smoke sensor readings"></canvas><div class="chart-empty" id="chartEmpty"><span class="empty-orbit"><i></i></span><strong>Waiting for the first signal</strong><small>Sensor history will draw here automatically.</small></div></div>
+              <div class="chart-axis"><span id="chartStart">--:--</span><span>TIME →</span><span id="chartEnd">--:--</span></div>
             </article>
 
-            <article class="panel activity-panel">
-              <div class="panel-heading activity-heading"><div><div class="panel-eyebrow">EVENT LOG</div><h3>Recent activity</h3><p>Signals from your fire monitor.</p></div><span class="event-count" id="eventCount">0</span></div>
-              <div class="event-list" id="eventList"><div class="activity-empty"><span class="empty-check">✓</span><div><strong>All quiet here</strong><small>No alerts have been recorded.</small></div></div></div>
-              <div class="activity-footer"><span class="footer-live-dot"></span>EVENTS UPDATE IN REAL TIME</div>
+            <article class="data-panel event-panel">
+              <div class="panel-top event-top" id="activity-log">
+                <div><span class="panel-label">INCIDENT REGISTER</span><h3>Recent events</h3><p>Threshold crossings and recoveries</p></div>
+                <span class="event-count" id="eventCount">0</span>
+              </div>
+              <div class="event-list" id="eventList"><div class="activity-empty"><span class="empty-check">✓</span><div><strong>No events recorded</strong><small>Your sensor field is quiet.</small></div></div></div>
+              <div class="event-footer"><span class="footer-live-dot"></span>EVENT STREAM ACTIVE</div>
             </article>
           </section>
 
-          <section class="setup-banner" id="setup">
-            <div class="setup-symbol"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v5m0 8v5M3 12h5m8 0h5M5.6 5.6l3.5 3.5m5.8 5.8 3.5 3.5m0-12.8-3.5 3.5m-5.8 5.8-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.5"/></svg></div>
-            <div class="setup-copy"><span>FIRST TIME HERE?</span><strong>Connect your ESP32 to bring this dashboard to life.</strong><p>Wire the sensors, add your Wi-Fi details in <code>Config.h</code>, then upload the Arduino sketch.</p></div>
-            <a class="button button-setup" href="/setup.html" target="_blank" rel="noreferrer">View setup guide <span>↗</span></a>
+          <section class="setup-strip">
+            <div class="setup-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.4"/><path d="m8.5 12 2.3 2.3 4.8-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="setup-copy"><span>NEED TO BRING IT ONLINE?</span><strong>Start with the wiring, then wake the monitor.</strong><small>Open the field guide for pins, Wi-Fi, and upload steps.</small></div>
+            <a href="/setup.html" class="setup-link">FIELD GUIDE <span>↗</span></a>
           </section>
 
-          <footer class="page-footer"><span>EMBERWATCH <i>·</i> SMART FIRE DETECTION</span><span>Prototype monitoring system <b>·</b> Keep certified alarms installed</span></footer>
+          <footer class="page-footer"><span>EMBERWATCH <i>/</i> FIELD CONSOLE</span><span>Sensor prototype <b>·</b> Keep certified alarms installed</span></footer>
         </div>
       </main>
     </div>
 
     <div class="alert-backdrop" id="alertBackdrop" aria-hidden="true">
       <section class="alert-modal" role="alertdialog" aria-modal="true" aria-labelledby="alertTitle" aria-describedby="alertBody">
-        <div class="modal-signal"><span class="modal-signal-ring"></span><span class="modal-signal-core"><svg viewBox="0 0 32 32" fill="none"><path d="M17.6 3.5c1 4.9-2.4 6-1 9.2.8-1.4 1.8-2 3-2.5 3.5 3.1 4.9 5.7 4.1 9.1-.8 3.4-3.7 5.4-7.5 5.4-4.4 0-7.5-2.8-7.5-7 0-3.2 1.7-5.9 4.9-8.7-.3 2.8.7 4 1.5 4.7-1.8-5.1-.2-7.1 2.5-10.2Z" fill="currentColor"/></svg></span></div>
+        <div class="modal-signal"><span class="modal-signal-ring"></span><span class="modal-signal-core"><svg viewBox="0 0 36 42" fill="none" aria-hidden="true"><path d="M19.9 3.4c1.6 7.8-3.7 9.5-1.6 14.6 1.3-2.2 2.8-3.3 4.8-4 5.5 4.8 7.8 8.9 6.5 14.3-1.2 5.4-5.8 8.7-11.7 8.7-6.8 0-11.7-4.4-11.7-11 0-5.1 2.6-9.3 7.6-13.7-.4 4.4 1.1 6.3 2.4 7.4-1.7-7.1 1.7-10.1 3.7-16.3Z" fill="currentColor"/></svg></span></div>
         <div class="modal-kicker"><span></span><span id="modalKicker">IMMEDIATE ATTENTION</span></div>
         <h2 id="alertTitle">Fire condition detected</h2>
         <p id="alertBody">Your sensor readings crossed the configured alert threshold. Check the area and respond safely.</p>
         <div class="modal-reading-row"><div><span>TEMPERATURE</span><strong id="modalTemperature">-- °C</strong></div><div><span>SMOKE SIGNAL</span><strong id="modalSmoke">-- ADC</strong></div><div><span>TRIGGERED</span><strong id="modalTime">--:--</strong></div></div>
         <div class="modal-reasons" id="modalReasons"></div>
-        <button class="button button-danger" id="acknowledgeAlert" type="button">Acknowledge alert <span>→</span></button>
+        <button class="button-danger" id="acknowledgeAlert" type="button">Acknowledge alert <span>→</span></button>
         <small class="modal-note">If you see or smell fire, leave immediately and call your local emergency number.</small>
       </section>
     </div>
