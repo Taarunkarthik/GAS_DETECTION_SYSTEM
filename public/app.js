@@ -81,10 +81,20 @@ function setHero(state, online) {
     $("#humidityValue").textContent = "--%";
     $("#temperatureValue").textContent = "--";
     $("#smokeValue").textContent = "--";
+    $("#temperatureValueDetail").textContent = "--";
+    $("#smokeValueDetail").textContent = "--";
     $("#temperatureState").textContent = "Awaiting reading";
     $("#smokeState").textContent = "Awaiting reading";
     $("#temperatureState").className = "sensor-state state-muted";
     $("#smokeState").className = "sensor-state state-muted";
+    $("#temperatureStateDetail").textContent = "Awaiting reading";
+    $("#smokeStateDetail").textContent = "Awaiting reading";
+    $("#temperatureStateDetail").className = "sensor-state state-muted";
+    $("#smokeStateDetail").className = "sensor-state state-muted";
+    document.querySelectorAll(".scale-fill").forEach((marker) => {
+      marker.style.left = "4px";
+      marker.classList.remove("warning", "critical");
+    });
     maybeResolveAlert(false, null);
     return;
   }
@@ -120,22 +130,29 @@ function setHero(state, online) {
   $("#humidityValue").textContent = current.humidity === null || current.humidity === undefined ? "--%" : `${Number(current.humidity).toFixed(1)}%`;
   $("#temperatureValue").textContent = formatTemperature(current.temperatureC);
   $("#smokeValue").textContent = Number(current.smokeRaw).toLocaleString();
+  $("#temperatureValueDetail").textContent = formatTemperature(current.temperatureC);
+  $("#smokeValueDetail").textContent = Number(current.smokeRaw).toLocaleString();
 
-  const temperatureMarker = $(".scale-fill");
-  if (temperatureMarker) {
-    const markerValue = Number(current.temperatureC);
-    const markerPercent = Number.isFinite(markerValue) ? Math.max(2, Math.min(98, markerValue / 60 * 100)) : 2;
+  const markerValue = Number(current.temperatureC);
+  const markerPercent = Number.isFinite(markerValue) ? Math.max(2, Math.min(98, markerValue / 60 * 100)) : 2;
+  document.querySelectorAll(".scale-fill").forEach((temperatureMarker) => {
     temperatureMarker.style.left = String(markerPercent) + "%";
     temperatureMarker.classList.toggle("warning", temperatureWarning && !temperatureCritical);
     temperatureMarker.classList.toggle("critical", temperatureCritical);
-  }
+  });
 
   const tempState = $("#temperatureState");
   tempState.textContent = current.temperatureC === null ? "Sensor unavailable" : temperatureCritical ? "Critical" : temperatureWarning ? "Warning" : "Within range";
-  tempState.className = `sensor-state ${current.temperatureC === null ? "state-muted" : temperatureCritical ? "state-alert" : temperatureWarning ? "state-warning" : "state-normal"}`;
+  const temperatureStateClass = current.temperatureC === null ? "state-muted" : temperatureCritical ? "state-alert" : temperatureWarning ? "state-warning" : "state-normal";
+  tempState.className = `sensor-state ${temperatureStateClass}`;
+  $("#temperatureStateDetail").textContent = tempState.textContent;
+  $("#temperatureStateDetail").className = `sensor-state ${temperatureStateClass}`;
   const smokeState = $("#smokeState");
   smokeState.textContent = !current.smokeSensorOk ? "Check sensor input" : smokeCritical ? "Critical" : smokeWarning ? "Warning" : "Within range";
-  smokeState.className = `sensor-state ${!current.smokeSensorOk ? "state-muted" : smokeCritical ? "state-alert" : smokeWarning ? "state-warning" : "state-normal"}`;
+  const smokeStateClass = !current.smokeSensorOk ? "state-muted" : smokeCritical ? "state-alert" : smokeWarning ? "state-warning" : "state-normal";
+  smokeState.className = `sensor-state ${smokeStateClass}`;
+  $("#smokeStateDetail").textContent = smokeState.textContent;
+  $("#smokeStateDetail").className = `sensor-state ${smokeStateClass}`;
 
   if (active) {
     const fire = current.fire;
@@ -163,6 +180,8 @@ function applyState(state) {
     currentThresholds = state.thresholds;
     $("#temperatureLimit").textContent = `${state.thresholds.temperatureWarningC}° / ${state.thresholds.temperatureC}°C`;
     $("#smokeLimit").textContent = `${Number(state.thresholds.smokeRawWarning).toLocaleString()} / ${Number(state.thresholds.smokeRaw).toLocaleString()}`;
+    $("#temperatureLimitDetail").textContent = `${state.thresholds.temperatureWarningC}° / ${state.thresholds.temperatureC}°C`;
+    $("#smokeLimitDetail").textContent = `${Number(state.thresholds.smokeRawWarning).toLocaleString()} / ${Number(state.thresholds.smokeRaw).toLocaleString()}`;
     $("#thresholdSummary").textContent = `Warn ${state.thresholds.temperatureWarningC}°C / fire ${state.thresholds.temperatureC}°C · smoke ${Number(state.thresholds.smokeRawWarning).toLocaleString()} / ${Number(state.thresholds.smokeRaw).toLocaleString()} ADC`;
   }
   if (state.latest) {
@@ -491,7 +510,7 @@ function connectLiveStream() {
 }
 
 function showScreen(name, updateUrl = true) {
-  const allowedScreens = new Set(["overview", "activity", "device", "guide"]);
+  const allowedScreens = new Set(["overview", "sensors", "activity", "device", "guide"]);
   const screenName = allowedScreens.has(name) ? name : "overview";
   const targetScreen = document.querySelector(`[data-screen="${screenName}"]`);
   if (!targetScreen) return;

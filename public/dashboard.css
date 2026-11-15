@@ -502,3 +502,64 @@ button { color: inherit; }
   .guide-caution { align-items: flex-start; padding: 12px; font-size: 8px; }
   .guide-bottom-grid { margin-top: 9px; }
 }
+
+
+.sensor-heading-actions { display: flex; align-items: center; gap: 15px; }
+.screen-link {
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px; flex: 0 0 auto;
+  padding: 10px 12px; color: #f4eee2; background: var(--charcoal); border: 1px solid var(--charcoal);
+  border-radius: 6px; font: 500 7px var(--mono); letter-spacing: .08em; white-space: nowrap; cursor: pointer;
+  transition: background .2s ease,border-color .2s ease,transform .2s ease;
+}
+.screen-link:hover { color: white; background: var(--ember); border-color: var(--ember); transform: translateY(-1px); }
+.screen-link span { color: var(--ember-hi); font-size: 12px; }
+.screen-link:hover span { color: white; }
+
+.sensor-detail-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.sensor-detail-card { min-height: 278px; padding: 22px 24px 17px; }
+.sensor-detail-card::before { left: 24px; }
+.sensor-detail-card .sensor-title { margin-top: 17px; font-size: 12px; }
+.sensor-detail-card .sensor-reading { margin-top: 4px; font-size: clamp(48px,5vw,66px); }
+.sensor-detail-card .sensor-reading small { font-size: 16px; }
+.sensor-detail-card .sensor-reading .adc-unit { font-size: 12px; }
+.sensor-detail-card .temp-scale { margin-top: 8px; }
+.sensor-detail-card .smoke-scale { height: 28px; margin-top: 7px; }
+.sensor-detail-card .sensor-bottom { margin-top: 30px; }
+.sensor-detail-card.smoke-card .sensor-bottom { margin-top: 26px; }
+.sensor-detail-note { display: flex; align-items: start; gap: 9px; margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(44,41,34,.09); }
+.sensor-detail-note > span { color: var(--ember); font: 500 8px var(--mono); }
+.sensor-detail-note p { margin: 0; color: #8a8377; font-size: 8px; line-height: 1.55; }
+.sensor-reference-strip { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 14px 17px; background: #e5ded0; border: 1px solid #d6cebf; border-radius: 9px; }
+.reference-mark { width: 24px; height: 24px; display: grid; place-items: center; flex: 0 0 auto; color: var(--teal); border: 1px solid rgba(22,122,107,.3); border-radius: 50%; font: 500 11px var(--mono); }
+.sensor-reference-strip p { margin: 0; color: #777166; font-size: 8px; line-height: 1.55; }
+.sensor-reference-strip p b { color: #37352e; font: 600 9px var(--display); }
+.sensor-reference-strip .screen-link { margin-left: auto; }
+
+@media (max-width: 900px) {
+  .sensor-detail-card { padding-left: 17px; padding-right: 17px; }
+  .sensor-detail-card::before { left: 17px; }
+}
+@media (max-width: 760px) {
+  .rail-nav { gap: clamp(4px,1.3vw,9px); }
+  .rail-link { width: clamp(42px,13vw,50px); }
+  .rail-help { width: 40px; }
+  .sensor-heading-actions { gap: 0; }
+  .sensor-heading-actions .scan-caption { display: none; }
+  .screen-link { gap: 7px; padding: 9px 8px; font-size: 6px; }
+  .sensor-detail-grid { grid-template-columns: 1fr; }
+  .sensor-detail-card { min-height: 260px; padding: 17px 15px 14px; }
+  .sensor-detail-card::before { left: 15px; }
+  .sensor-detail-card .sensor-title { margin-top: 12px; font-size: 10px; }
+  .sensor-detail-card .sensor-reading { font-size: clamp(46px,12vw,58px); }
+  .sensor-detail-card .sensor-bottom { align-items: center; flex-direction: row; margin-top: 28px; }
+  .sensor-detail-card.smoke-card .sensor-bottom { margin-top: 25px; }
+  .sensor-reference-strip { align-items: flex-start; flex-wrap: wrap; padding: 12px; }
+  .sensor-reference-strip p { flex: 1; min-width: 0; }
+  .sensor-reference-strip .screen-link { width: 100%; margin: 2px 0 0; }
+}
+@media (max-width: 390px) {
+  .rail { padding-left: 7px; padding-right: 7px; }
+  .rail-nav { gap: 3px; }
+  .rail-link { width: 41px; }
+  .rail-help { width: 38px; }
+}
