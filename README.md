@@ -1,117 +1,173 @@
-# Emberwatch — Smart Fire Detection & Alert System
+# 🔥 Emberwatch
 
-A complete ESP32 and web dashboard prototype for the **Smart Fire Detection & Alert System** project topic. The dashboard shows live temperature and smoke-sensor readings, device connectivity, an event log, a live chart, and a full-screen alert when a configured threshold is crossed. The ESP32 independently drives its LED and buzzer, so those local alerts do not rely on the website or internet connection.
+<div align="center">
 
-The supplied GitHub repository was empty when this work started, so this workspace contains the project scaffold.
+### Smart Fire Detection & Alert System
 
-## Hardware assumption
+An ESP32 sensor prototype with local alarms and a live web dashboard.
 
-This firmware targets an **ESP32 DevKit V1**, an **MQ-2 analog gas/smoke sensor module**, a **DHT11 temperature/humidity sensor**, two external LEDs, and an **active buzzer driven through an NPN transistor**. The ESP32 is used because it has built-in Wi-Fi. A classic Arduino Uno does not have Wi-Fi built in and would need a separate network module plus different firmware.
+<img alt="ESP32" src="https://img.shields.io/badge/Board-ESP32-00979D?logo=espressif&logoColor=white">
+<img alt="Node.js 18+" src="https://img.shields.io/badge/Backend-Node.js%2018%2B-339933?logo=nodedotjs&logoColor=white">
+<img alt="No Docker" src="https://img.shields.io/badge/Deployment-No%20Docker-2496ED?logo=docker&logoColor=white">
 
-The topic sheet asks for continuous sensor readings, threshold comparisons, LED/buzzer and Serial alerts, modular code, a custom header, and at least five user-defined functions. The sketch declares eight functions in `Config.h` and defines them in the `.ino` file.
+</div>
 
-## How readings reach the site
+Emberwatch reads temperature, humidity, and raw smoke-sensor values. The ESP32 controls the LEDs and buzzer directly; the website displays readings, connection status, event history, and fire alerts.
 
-```text
-MQ-2 + DHT11 → ESP32 -- HTTP POST /api/readings --> Node.js backend
-                                                    │
-Browser dashboard <-- server-sent events (SSE) -----┘
+> **Educational prototype:** this project is not a certified life-safety device. Keep approved smoke and fire alarms installed. MQ-2 values are raw ADC readings, not calibrated smoke concentration or ppm.
+
+## Contents
+
+- [What it does](#what-it-does)
+- [System overview](#system-overview)
+- [Hardware and wiring](#hardware-and-wiring)
+- [Run locally](#run-locally)
+- [Configure and upload the ESP32](#configure-and-upload-the-esp32)
+- [Thresholds](#thresholds)
+- [Deploy publicly](#deploy-publicly)
+- [API](#api)
+- [Troubleshooting](#troubleshooting)
+
+## What it does
+
+- Samples an **MQ-2** smoke/gas sensor and **DHT11** temperature/humidity sensor.
+- Averages five MQ-2 ADC samples to reduce noise.
+- Drives the safe LED, alert LED, and buzzer from the ESP32.
+- Posts readings to a small Node.js API about every two seconds.
+- Updates the dashboard live using server-sent events (SSE).
+- Shows current device status, sensor readings, alert history, and a fire popup.
+- Runs without Docker or third-party Node packages.
+
+## System overview
+
+```mermaid
+flowchart LR
+  MQ[MQ-2 sensor] --> ESP[ESP32 DevKit V1]
+  DHT[DHT11 sensor] --> ESP
+  ESP -->|LED and buzzer alerts| ALARM[Local alarm]
+  ESP -->|HTTP POST readings| API[Node.js API]
+  API -->|Serves site and SSE updates| WEB[Web dashboard]
 ```
 
-The board sends one JSON reading about every 2 seconds. The backend validates it, applies warning/fire thresholds, saves the latest reading and fire-alert history, then pushes each update to open dashboards. The device authenticates with `X-Device-Key`. The website and API are served by the same Node process. There is no Docker and no third-party Node dependency.
+The local LED and buzzer alerts work independently of the website and internet connection. The computer running the backend must be reachable by the ESP32 for dashboard updates.
 
-## Start on your local network
+## Hardware and wiring
 
-1. Install Node.js 18 or later.
-2. In PowerShell, open this project folder and start the backend:
+This firmware is written for an **ESP32 DevKit V1**. A classic Arduino Uno needs a separate Wi-Fi module and different firmware.
 
-   ```powershell
-   Copy-Item .env.example .env
-   npm start
-   ```
-
-   `npm install` is not needed. The development API key is preconfigured in both the example environment and firmware. Before deploying or sharing your network, replace it with a long random value in both `.env` and `firmware/esp32_fire_alert/Config.h`.
-
-3. Open [http://localhost:3000](http://localhost:3000) on the computer running Node.
-4. Find the computer's private IPv4 address by running `ipconfig` in PowerShell. Allow Node.js on your private network if Windows Firewall asks.
-5. Edit `firmware/esp32_fire_alert/Config.h`:
-
-   ```cpp
-   #define WIFI_SSID "your-2.4-GHz-network"
-   #define WIFI_PASSWORD "your-wifi-password"
-   #define API_URL "http://192.168.1.25:3000/api/readings"
-   #define DEVICE_API_KEY "demo-key-change-before-deployment"
-   ```
-
-   Replace `192.168.1.25` with the computer's LAN address. Do not put `localhost` in `API_URL`: on the ESP32, that points back to the ESP32 itself. Keep the board and the backend computer on the same Wi-Fi network for this local setup.
-
-6. In Arduino IDE, install Espressif's ESP32 board package, select the matching ESP32 board, then install **DHT sensor library by Adafruit** and **Adafruit Unified Sensor**.
-7. Open `firmware/esp32_fire_alert/esp32_fire_alert.ino`, upload it, and open Serial Monitor at **9600 baud**. Look for `Dashboard update sent`. The dashboard refreshes itself with new readings.
-
-The dashboard offers an **Enable alerts** action. Click it to allow browser notifications and enable an optional repeating sound in the current tab. The visual fire popup does not require this permission.
-
-## Wiring — ESP32 DevKit V1
-
-| Part | Connections |
+| Component | ESP32 connection |
 | --- | --- |
-| MQ-2 | VCC → 5V; GND → GND; AO → GPIO 34 through a divider |
-| MQ-2 divider | AO → 10 kΩ resistor → GPIO 34; GPIO 34 → 10 kΩ resistor → GND |
-| DHT11 | VCC → 3.3V; GND → GND; DATA → GPIO 4. A bare DHT11 needs a pull-up resistor from DATA to 3.3V; many modules include it. |
-| Red alert LED | GPIO 18 → 220–330 Ω resistor → LED anode; LED cathode → GND |
-| Green safe LED | GPIO 19 → 220–330 Ω resistor → LED anode; LED cathode → GND |
-| Active buzzer | GPIO 26 → 1 kΩ resistor → NPN base; emitter → GND; collector → buzzer negative; buzzer positive → its rated supply |
+| DHT11 data | GPIO 4 |
+| MQ-2 analog output | GPIO 34 through a voltage divider |
+| Red alert LED | GPIO 18 through a 220–330 Ω resistor |
+| Green safe LED | GPIO 19 through a 220–330 Ω resistor |
+| Active buzzer driver | GPIO 26 through an NPN transistor |
+| Shared ground | Connect all component grounds to ESP32 GND |
 
-All grounds must be connected together. Do not connect the MQ-2's 5 V analog output directly to an ESP32 pin. The two-resistor divider halves a 5 V output to 2.5 V. Do not drive a buzzer directly from GPIO; use the transistor, and add a flyback diode for a magnetic buzzer. Pin numbers and built-in LEDs vary by ESP32 board.
+**Power and wiring notes**
 
-## Thresholds and sensor behavior
+- Power the MQ-2 module as required by its board, commonly 5 V. Do **not** connect a 5 V analog output directly to an ESP32 input. Use a divider to bring it below 3.3 V; the README's suggested 10 kΩ / 10 kΩ divider produces about 2.5 V from a 5 V signal.
+- Drive the buzzer through an NPN transistor, not directly from the ESP32 GPIO. Use a flyback diode for a magnetic buzzer.
+- A bare DHT11 may need a pull-up resistor between DATA and 3.3 V; many sensor modules include one.
+- Check the pin labels and voltage requirements of your exact modules before wiring.
 
-The starter values from your supplied sketch are:
+## Run locally
 
-- Temperature warning: **30°C**
-- Temperature fire alert: **35°C**
-- MQ-2 warning reading: **225 raw ADC**
-- MQ-2 fire alert: **300 raw ADC**
+### 1. Start the backend
 
-The system has three states: safe, warning, and fire. Either sensor can raise the state. In warning, the red LED turns on and the buzzer beeps briefly. In fire, the red LED and buzzer pulse, then the red LED stays on for that monitoring cycle. The firmware and backend thresholds must match: update `Config.h` and the corresponding values in `.env` (`TEMP_WARNING_C`, `FIRE_TEMP_C`, `SMOKE_WARNING_RAW`, `SMOKE_RAW_THRESHOLD`). Restart Node after changing `.env` and re-upload the sketch after changing `Config.h`.
+Install Node.js 18 or later. From the project folder, open a VS Code terminal and run:
 
-These are demo values, not validated fire limits. MQ-2 modules vary and need warm-up, baseline observation, and individual calibration. The displayed MQ-2 number is an ADC reading, **not ppm** and not calibrated smoke concentration. Never test by lighting a fire. Follow the datasheet supplied with the exact module; some manufacturer datasheets specify an initial burn-in of 24–48 hours.
-
-## Hosting outside your Wi-Fi
-
-For a remote dashboard, deploy this project to a service that runs Node.js and provides HTTPS. Set `PORT`, `DEVICE_API_KEY`, and the four threshold variables in that service's environment settings. Change `API_URL` in the sketch to the public HTTPS `/api/readings` endpoint, and put the host's trusted root CA PEM in `SERVER_ROOT_CA`. The firmware verifies the host certificate; it intentionally does not disable TLS checks. Do not expose your computer's local port by forwarding it through a home router.
-
-## Project files
-
-- `firmware/esp32_fire_alert/esp32_fire_alert.ino` — sensor sampling, threshold logic, local alarm outputs, Wi-Fi and API delivery.
-- `firmware/esp32_fire_alert/Config.h` — pins, Wi-Fi, backend endpoint, thresholds, and function declarations.
-- `backend/server.js` — dependency-free Node HTTP server, API, persistence, alarm state, and SSE stream.
-- `public/index.html`, `public/styles.css`, `public/app.js` — responsive monitoring console and alert popup.
-- `public/setup.html` — wiring and bring-up guide served by the dashboard.
-
-## API payload
-
-The ESP32 posts a payload similar to this to `/api/readings`:
-
-```json
-{
-  "deviceId": "esp32-fire-01",
-  "smokeRaw": 1260,
-  "temperatureC": 28.4,
-  "humidity": 46.0,
-  "sensorState": 0,
-  "alarmActive": false,
-  "rssi": -54,
-  "uptimeMs": 84320
-}
+```powershell
+Copy-Item .env.example .env  # only needed the first time
+npm start
 ```
 
-Useful endpoints: `GET /api/health`, `GET /api/state`, `GET /api/history`, and `GET /api/stream` (SSE). Only the device POST endpoint requires the API key.
+Keep this terminal open while using the local dashboard. No `npm install` is needed. Open **http://localhost:3000** on the computer running the server.
 
-## Important use limitation
+If PowerShell says `.env` already exists, skip the copy command. Set a private `DEVICE_API_KEY` in `.env` and use the same value in the ESP32 configuration.
 
-This is an educational prototype, not a life-safety product. It has no certified smoke detector, backup power, supervised wiring, redundant communications, or evaluated alarm thresholds. Keep certified smoke/fire alarms installed and follow local building and fire-safety requirements.
+### 2. Point the ESP32 at your computer
 
-## References
+Find the computer's current Wi-Fi IPv4 address with `ipconfig`. In `firmware/esp32_fire_alert/Config.h`, set:
 
-- [Arduino-ESP32 ADC documentation](https://docs.espressif.com/projects/arduino-esp32/en/latest/api/adc.html)
-- [Winsen MQ-2 sensor information](https://www.winsentech.com/Semiconductor_Combustible_Gas_Sensor_MQ-2.html)
+```cpp
+#define WIFI_SSID "your-2.4-GHz-network"
+#define WIFI_PASSWORD "your-wifi-password"
+#define API_URL "http://YOUR_COMPUTER_IPV4:3000/api/readings"
+#define DEVICE_API_KEY "the-same-private-key-as-in-.env"
+```
+
+Replace `YOUR_COMPUTER_IPV4` with the computer's address on the same Wi-Fi network, for example `192.168.1.25`. Do not use `localhost` here: from the ESP32, that would refer to the ESP32 itself. If Windows Firewall asks, allow Node.js on your private network.
+
+### 3. Upload the firmware
+
+1. Open `firmware/esp32_fire_alert/esp32_fire_alert.ino` in Arduino IDE.
+2. Install the ESP32 board package, **DHT sensor library by Adafruit**, and **Adafruit Unified Sensor** if they are not installed.
+3. Select your ESP32 board and port, then click **Upload**.
+4. Open Serial Monitor at **9600 baud**.
+5. Look for `Wi-Fi connected` and `Dashboard update sent (HTTP 2xx)`.
+
+The dashboard should begin showing the latest readings and device status.
+
+## Thresholds
+
+The starter thresholds match the supplied project code. The backend's `.env` values and firmware's `Config.h` values should stay in sync.
+
+| Reading | Warning | Fire alert |
+| --- | ---: | ---: |
+| Temperature | 30 °C | 35 °C |
+| MQ-2 raw ADC | 225 | 300 |
+
+The MQ-2 value is an ADC count from **0 to 4095**, not ppm. MQ-2 modules vary and need warm-up and individual calibration. These are demo thresholds, not validated fire limits. Never test the system by lighting a fire.
+
+## Deploy publicly
+
+The dashboard and API are served by the same Node.js process, so deploy the project as a Node app; Docker is not required. Choose a host that supports Node.js 18+, HTTPS, and persistent storage for the `.data` directory.
+
+1. Set `NODE_ENV=production`, a unique `DEVICE_API_KEY`, `PORT` if required by the host, and the thresholds in the host's environment settings:
+
+   ```text
+   TEMP_WARNING_C=30
+   FIRE_TEMP_C=35
+   SMOKE_WARNING_RAW=225
+   SMOKE_RAW_THRESHOLD=300
+   ```
+
+   The server refuses to start in production with the example demo key.
+2. Change the firmware `API_URL` to the hosted HTTPS endpoint ending in `/api/readings`.
+3. Add the hosting provider's trusted root CA certificate to `SERVER_ROOT_CA` in `Config.h`, then upload the firmware again. HTTPS requests are certificate-verified.
+4. Configure persistent storage for `.data`; the backend stores the latest reading and alert history there. Without persistent storage, a host restart may clear saved data.
+5. Keep `.env`, Wi-Fi credentials, and private API keys out of GitHub. `.gitignore` excludes `.env` and `.data`.
+
+For a remote setup, both the ESP32 and the hosted backend need internet access. Do not expose a development computer by forwarding its local server port through a router.
+
+## API
+
+The firmware sends `POST /api/readings` with an `X-Device-Key` header. The dashboard uses the following endpoints:
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/health` | Check that the API is running |
+| `GET /api/state` | Get the latest reading and device status |
+| `GET /api/history` | Read recent sensor and alert history |
+| `GET /api/stream` | Receive live updates using SSE |
+| `POST /api/readings` | Submit an ESP32 reading; requires the device key |
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| ESP32 cannot find the network | Use a 2.4 GHz Wi-Fi network; verify the SSID exactly, and keep an iPhone hotspot's compatibility option enabled if using one. |
+| Wi-Fi connects, but the dashboard stays offline | Confirm the backend is running, the ESP32 and computer share a network, and `API_URL` uses the computer's current IPv4 address. |
+| API responds with an authorization error | Make `DEVICE_API_KEY` identical in the backend environment and `Config.h`. |
+| HTTP/TLS request fails after public deployment | Confirm `API_URL` uses HTTPS and `SERVER_ROOT_CA` contains the provider's trusted root CA certificate. |
+| DHT11 values show as unavailable | Check DATA wiring, power, common ground, and the selected DHT11 library. |
+| MQ-2 numbers look unexpected | The display is raw ADC; check the divider, power, warm-up, and sensor-specific calibration. |
+
+---
+
+<div align="center">
+
+**Emberwatch · ESP32 + Node.js · Built for an educational project**
+
+</div>
