@@ -1,183 +1,217 @@
-# 🔥 Emberwatch
+# Emberwatch
 
 <div align="center">
 
-### Smart Fire Detection & Alert System
+## 🔥 Smart Fire Detection & Alert System
 
-An ESP32 sensor prototype with local alarms and a live web dashboard.
+**A connected ESP32 prototype for early fire-condition monitoring**
 
-<img alt="ESP32" src="https://img.shields.io/badge/Board-ESP32-00979D?logo=espressif&logoColor=white">
-<img alt="Node.js 18+" src="https://img.shields.io/badge/Backend-Node.js%2018%2B-339933?logo=nodedotjs&logoColor=white">
-<img alt="Docker" src="https://img.shields.io/badge/Container-Docker-2496ED?logo=docker&logoColor=white">
+Reads temperature, humidity, and smoke-sensor values; raises local alarms; and can publish readings to a live dashboard.
+
+<br>
+
+<img alt="ESP32" src="https://img.shields.io/badge/Device-ESP32-00979D?logo=espressif&logoColor=white">
+<img alt="Arduino" src="https://img.shields.io/badge/Firmware-Arduino%20C%2B%2B-008184?logo=arduino&logoColor=white">
+<img alt="Node.js" src="https://img.shields.io/badge/API-Node.js%2018%2B-339933?logo=nodedotjs&logoColor=white">
+<img alt="Docker" src="https://img.shields.io/badge/Backend-Docker-2496ED?logo=docker&logoColor=white">
+<img alt="Vercel" src="https://img.shields.io/badge/Dashboard-Vercel-000000?logo=vercel&logoColor=white">
+
+<br><br>
+
+[Open the dashboard](https://gas-detection-gules.vercel.app/) · [Read the setup guide](#get-started) · [Troubleshoot](#-troubleshooting)
 
 </div>
 
-Emberwatch reads temperature, humidity, and raw smoke-sensor values. The ESP32 controls the LEDs and buzzer directly; the website displays readings, connection status, event history, and fire alerts.
+> [!CAUTION]
+> **Educational prototype only.** This project is not a certified fire alarm or life-safety device. Keep approved smoke and fire alarms installed. MQ-2 readings are raw ADC values, not calibrated smoke concentration or ppm.
 
-> **Educational prototype:** this project is not a certified life-safety device. Keep approved smoke and fire alarms installed. MQ-2 values are raw ADC readings, not calibrated smoke concentration or ppm.
+---
 
-## Contents
+## ✨ At a glance
 
-- [What it does](#what-it-does)
-- [System overview](#system-overview)
-- [Hardware and wiring](#hardware-and-wiring)
-- [Run locally](#run-locally)
-- [Configure and upload the ESP32](#configure-and-upload-the-esp32)
-- [Thresholds](#thresholds)
-- [Deploy publicly](#deploy-publicly)
-- [API](#api)
-- [Troubleshooting](#troubleshooting)
+| | |
+| --- | --- |
+| **Device** | ESP32 DevKit V1 with DHT11 and MQ-2 sensors |
+| **Local response** | Safe and alert LEDs, buzzer, and Serial Monitor messages |
+| **Dashboard** | Live readings, connection status, event history, and fire alerts |
+| **Backend** | Small Node.js API with file-backed history |
+| **Run locally** | Docker Compose, or Node.js directly |
 
-## What it does
+The ESP32 handles sensor checks and local alarms. The dashboard is an optional companion: local monitoring and alarms continue even when Wi-Fi or the backend is unavailable.
 
-- Samples an **MQ-2** smoke/gas sensor and **DHT11** temperature/humidity sensor.
-- Averages five MQ-2 ADC samples to reduce noise.
-- Drives the safe LED, alert LED, and buzzer from the ESP32.
-- Posts readings to a small Node.js API about every two seconds.
-- Updates the dashboard live using server-sent events (SSE).
-- Shows current device status, sensor readings, alert history, and a fire popup.
-- Runs in Docker with Compose; the Node backend has no third-party package dependencies.
-
-## System overview
+## 🧭 System overview
 
 ```mermaid
 flowchart LR
-  MQ[MQ-2 sensor] --> ESP[ESP32 DevKit V1]
-  DHT[DHT11 sensor] --> ESP
-  ESP -->|LED and buzzer alerts| ALARM[Local alarm]
-  ESP -->|HTTP POST readings| API[Node.js API]
-  API -->|Serves site and SSE updates| WEB[Web dashboard]
+  DHT[DHT11 temperature / humidity] --> ESP[ESP32]
+  MQ[MQ-2 smoke sensor] --> ESP
+  ESP -->|GPIO 18 / 19 / 26| ALARM[LEDs and buzzer]
+  ESP -->|HTTP readings| API[Node.js API]
+  API -->|state, history, live updates| WEB[Vercel dashboard]
 ```
 
-The local LED and buzzer alerts work independently of the website and internet connection. The computer running the backend must be reachable by the ESP32 for dashboard updates.
+## 🚀 What it does
 
-## Hardware and wiring
+- Samples DHT11 temperature and humidity and averages five MQ-2 analog readings.
+- Classifies readings as **safe**, **warning**, or **fire** using configurable thresholds.
+- Activates the ESP32 LEDs and buzzer locally.
+- Prints sensor values and status to Serial Monitor.
+- Optionally sends readings to the backend about every two seconds.
+- Displays device state, recent readings, and alert history in the web dashboard.
 
-This firmware is written for an **ESP32 DevKit V1**. A classic Arduino Uno needs a separate Wi-Fi module and different firmware.
+## 🔌 Hardware and wiring
 
-| Component | ESP32 connection |
-| --- | --- |
-| DHT11 data | GPIO 4 |
-| MQ-2 analog output | GPIO 34 through a voltage divider |
-| Red alert LED | GPIO 18 through a 220–330 Ω resistor |
-| Green safe LED | GPIO 19 through a 220–330 Ω resistor |
-| Active buzzer driver | GPIO 26 through an NPN transistor |
-| Shared ground | Connect all component grounds to ESP32 GND |
+Firmware pin assignments are defined in `firmware/esp32_fire_alert/Config.h`.
 
-**Power and wiring notes**
+| Component | ESP32 pin | Notes |
+| --- | ---: | --- |
+| DHT11 data | GPIO 4 | Use a common ground; sensor modules often include a pull-up |
+| MQ-2 analog output | GPIO 34 | Use a voltage divider if the module output can exceed 3.3 V |
+| Red alert LED | GPIO 18 | Add a 220–330 Ω series resistor |
+| Green safe LED | GPIO 19 | Add a 220–330 Ω series resistor |
+| Buzzer driver | GPIO 26 | Drive the buzzer through a transistor |
+| Ground | GND | Connect sensor and driver grounds to ESP32 GND |
 
-- Power the MQ-2 module as required by its board, commonly 5 V. Do **not** connect a 5 V analog output directly to an ESP32 input. Use a divider to bring it below 3.3 V; the README's suggested 10 kΩ / 10 kΩ divider produces about 2.5 V from a 5 V signal.
-- Drive the buzzer through an NPN transistor, not directly from the ESP32 GPIO. Use a flyback diode for a magnetic buzzer.
-- A bare DHT11 may need a pull-up resistor between DATA and 3.3 V; many sensor modules include one.
-- Check the pin labels and voltage requirements of your exact modules before wiring.
+> **Protect the ESP32:** Do not connect a 5 V MQ-2 analog output directly to GPIO 34. Scale it to 3.3 V or lower. Check the voltage and pin labels on your exact sensor module before wiring.
 
-## Run locally
+<a id="get-started"></a>
+## 🧰 Get started
 
-### Start with Docker
+### 1. Upload the ESP32 firmware
 
-Install Docker Desktop and start it. From the project folder, open a terminal and run:
+1. Open `firmware/esp32_fire_alert/esp32_fire_alert.ino` in Arduino IDE. Keep `Config.h` in the same sketch folder.
+2. Install the ESP32 board package, **DHT sensor library by Adafruit**, and **Adafruit Unified Sensor**.
+3. In `Config.h`, enter Wi-Fi and backend settings if you want dashboard updates. Local sensor checks and alarms still run without a backend connection.
+4. Select your ESP32 board and serial port, then click **Upload**.
+5. Open Serial Monitor at **9600 baud**.
+
+### 2. Start the backend with Docker
+
+Install and start Docker Desktop, then open a terminal in the project folder:
 
 ```powershell
-Copy-Item .env.example .env  # only needed the first time
+Copy-Item .env.example .env  # first run only
+```
+
+Open `.env` and replace `DEVICE_API_KEY` with a private key. Keep the same key in the ESP32 `Config.h`. Then start the service:
+
+```powershell
 docker compose up --build -d
+docker compose ps
 ```
 
-Open **http://localhost:3001**. Docker maps host port 3001 to the app's container port 3000, leaving 3000 available for a backend already running directly from VS Code. View logs with `docker compose logs -f`; stop the container with `docker compose down`. The named Docker volume keeps `.data` across container rebuilds.
+Open **http://localhost:3001**. Compose maps your computer's port **3001** to the API container's port **3000**. Follow logs with `docker compose logs -f emberwatch`; stop the service with `docker compose down`. The named Docker volume keeps readings in `.data` across container rebuilds.
 
-If PowerShell says `.env` already exists, skip the copy command. Compose uses development mode locally, so the example API key works for a local demo. Replace it with a private key before putting the backend on a public server.
+If `.env` already exists, keep it; do not overwrite your existing settings with the example file.
 
-### Run directly with Node (optional)
+### 3. Connect the ESP32 to your local backend
 
-Install Node.js 18 or later. Copy `.env.example` to `.env` if needed, then run `npm start` from the project folder. Open **http://localhost:3000**.
+The ESP32 and computer must be on the same reachable network.
 
-### 2. Point the ESP32 at your computer
+1. Run `ipconfig` on Windows and find the computer's Wi-Fi IPv4 address.
+2. In `Config.h`, set the network name and password, then set:
+   ```cpp
+   #define API_URL "http://YOUR_COMPUTER_IPV4:3001/api/readings"
+   #define DEVICE_API_KEY "the-same-private-key-as-in-.env"
+   ```
+3. Replace `YOUR_COMPUTER_IPV4` with that IPv4 address, upload the firmware again, and allow Docker through Windows Firewall on a private network if prompted.
 
-Find the computer's current Wi-Fi IPv4 address with `ipconfig`. In `firmware/esp32_fire_alert/Config.h`, set:
+Do not use `localhost` in the ESP32's `API_URL`: that would point back to the ESP32 itself.
 
-```cpp
-#define WIFI_SSID "your-2.4-GHz-network"
-#define WIFI_PASSWORD "your-wifi-password"
-#define API_URL "http://YOUR_COMPUTER_IPV4:3001/api/readings"
-#define DEVICE_API_KEY "the-same-private-key-as-in-.env"
+### 4. Run without Docker (optional)
+
+For local development, install Node.js 18 or later, create `.env` from `.env.example` if needed, and run:
+
+```powershell
+npm start
 ```
 
-Replace `YOUR_COMPUTER_IPV4` with the computer's address on the same Wi-Fi network, for example `192.168.1.25`. Docker Compose maps host port `3001` to container port `3000`. Do not use `localhost` here: from the ESP32, that would refer to the ESP32 itself. If Windows Firewall asks, allow Docker Desktop on your private network.
+The direct Node server uses port **3000** by default.
 
-### 3. Upload the firmware
+## 🌐 Connect the Vercel dashboard
 
-1. Open `firmware/esp32_fire_alert/esp32_fire_alert.ino` in Arduino IDE.
-2. Install the ESP32 board package, **DHT sensor library by Adafruit**, and **Adafruit Unified Sensor** if they are not installed.
-3. Select your ESP32 board and port, then click **Upload**.
-4. Open Serial Monitor at **9600 baud**.
-5. Look for `Wi-Fi connected` and `Dashboard update sent (HTTP 2xx)`.
+Vercel cannot reach a backend that is only running on your computer's private network. The backend needs a public HTTPS address for the deployed dashboard.
 
-The dashboard should begin showing the latest readings and device status.
+For a temporary demo, Compose includes an optional Cloudflare Quick Tunnel:
 
-## Thresholds
+```powershell
+docker compose --profile public-tunnel up -d
+docker compose logs public-tunnel
+```
 
-The starter thresholds match the supplied project code. The backend's `.env` values and firmware's `Config.h` values should stay in sync.
+Copy the generated `trycloudflare.com` address into `public/config.js` as `window.EMBERWATCH_API_BASE`, then redeploy the Vercel site. Keep Docker and the tunnel running. Quick Tunnel URLs change when restarted and use dashboard polling instead of SSE, so they are suitable for demos rather than permanent hosting.
 
-| Reading | Warning | Fire alert |
+For a stable deployment, run the Docker backend on a public host with HTTPS and persistent storage mounted at `/app/.data`. Set its environment variables:
+
+```text
+NODE_ENV=production
+PORT=3000
+WEB_ORIGINS=https://gas-detection-gules.vercel.app
+DEVICE_API_KEY=<your-private-random-key>
+TEMP_WARNING_C=30
+FIRE_TEMP_C=35
+SMOKE_WARNING_RAW=225
+SMOKE_RAW_THRESHOLD=300
+```
+
+Set `window.EMBERWATCH_API_BASE` in `public/config.js` to the backend origin only (do not add `/api`), then redeploy the Vercel site. Set the firmware `API_URL` to `https://YOUR_BACKEND_HOST/api/readings`, configure `SERVER_ROOT_CA` with the host's trusted root CA certificate, and upload the firmware. Keep private keys and Wi-Fi credentials out of GitHub.
+
+Check that the backend is reachable at `https://YOUR_BACKEND_HOST/api/health`.
+
+## 🎚️ Demo thresholds
+
+Keep the firmware and backend thresholds in sync. Adjust these values only after observing and calibrating your own sensors.
+
+| Measurement | Warning | Fire alert |
 | --- | ---: | ---: |
 | Temperature | 30 °C | 35 °C |
 | MQ-2 raw ADC | 225 | 300 |
 
-The MQ-2 value is an ADC count from **0 to 4095**, not ppm. MQ-2 modules vary and need warm-up and individual calibration. These are demo thresholds, not validated fire limits. Never test the system by lighting a fire.
+MQ-2 counts range from **0 to 4095** on this ESP32 setup. Sensor modules vary and need warm-up; these example thresholds are not validated fire limits. Never test the system by lighting a fire.
 
-## Connect the Vercel site to a Docker backend
+## 📡 API reference
 
-The Node server serves the dashboard and API together. A Docker container on your own computer is private; the public Vercel site cannot reach it. For the deployed site, run this Docker image on a publicly reachable server that supports Docker, HTTPS, and persistent storage.
-
-1. Build and start the image on your Docker host. Expose its `PORT` (3000 by default) and mount persistent storage at `/app/.data`.
-2. Set these environment variables on that host:
-
-   ```text
-   NODE_ENV=production
-   PORT=3000
-   WEB_ORIGINS=https://gas-detection-gules.vercel.app
-   DEVICE_API_KEY=<your-private-random-key>
-   TEMP_WARNING_C=30
-   FIRE_TEMP_C=35
-   SMOKE_WARNING_RAW=225
-   SMOKE_RAW_THRESHOLD=300
-   ```
-
-3. Set `window.EMBERWATCH_API_BASE` in `public/config.js` to the backend's public origin, for example `https://your-backend.example.com`, and redeploy the Vercel site. Do not add `/api` to the origin; the dashboard appends API paths itself.
-4. Set the firmware `API_URL` to `https://your-backend.example.com/api/readings`, use the same `DEVICE_API_KEY`, add the host's trusted root certificate to `SERVER_ROOT_CA`, and upload the sketch again.
-5. Open `https://your-backend.example.com/api/health`. A JSON response confirms the API is running.
-
-The backend checks `WEB_ORIGINS` to allow browser requests from the Vercel site. Keep `.env`, Wi-Fi credentials, and private API keys out of GitHub. `.gitignore` excludes `.env` and `.data`.
-
-For a temporary demo without a separate backend host, Compose includes an optional Cloudflare Quick Tunnel. Start it with `docker compose --profile public-tunnel up -d` and read the generated `trycloudflare.com` URL using `docker compose logs public-tunnel`. Put that URL in `public/config.js` and redeploy Vercel. Quick Tunnel addresses change when restarted and do not support SSE, so the frontend uses polling in this mode. Keep Docker and the tunnel running. This is for demonstrations, not a permanent public deployment.
-
-## API
-
-The firmware sends `POST /api/readings` with an `X-Device-Key` header. The dashboard uses the following endpoints:
-
-| Endpoint | Purpose |
+| Method and route | Purpose |
 | --- | --- |
-| `GET /api/health` | Check that the API is running |
-| `GET /api/state` | Get the latest reading and device status |
+| `GET /api/health` | Check whether the backend is running |
+| `GET /api/state` | Read the latest sensor data and device status |
 | `GET /api/history` | Read recent sensor and alert history |
-| `GET /api/stream` | Receive live updates using SSE |
-| `POST /api/readings` | Submit an ESP32 reading; requires the device key |
+| `GET /api/stream` | Receive live updates over server-sent events |
+| `POST /api/readings` | Submit a reading; requires the `X-Device-Key` header |
 
-## Troubleshooting
+## 🛠️ Troubleshooting
 
 | Symptom | Check |
 | --- | --- |
-| ESP32 cannot find the network | Use a 2.4 GHz Wi-Fi network; verify the SSID exactly, and keep an iPhone hotspot's compatibility option enabled if using one. |
-| Local Docker dashboard stays offline | Confirm the container is running with `docker compose ps` and open `http://localhost:3001`. |
-| Vercel dashboard stays offline | Confirm `public/config.js` points to the public backend origin and the backend's `WEB_ORIGINS` includes the exact Vercel site origin. |
-| API responds with an authorization error | Make `DEVICE_API_KEY` identical in the backend environment and `Config.h`. |
-| HTTP/TLS request fails after public deployment | Confirm `API_URL` uses HTTPS and `SERVER_ROOT_CA` contains the provider's trusted root CA certificate. |
-| DHT11 values show as unavailable | Check DATA wiring, power, common ground, and the selected DHT11 library. |
-| MQ-2 numbers look unexpected | The display is raw ADC; check the divider, power, warm-up, and sensor-specific calibration. |
+| ESP32 cannot find the Wi-Fi network | Use 2.4 GHz Wi-Fi and check the SSID and password. |
+| Local dashboard shows the device offline | Run `docker compose ps`; confirm `http://localhost:3001` opens and the ESP32 uses the computer's IPv4 address. |
+| Vercel dashboard shows the device offline | Confirm `public/config.js` points to the public backend and `WEB_ORIGINS` includes the exact Vercel origin. |
+| API returns an authorization error | The backend `DEVICE_API_KEY` and firmware key must match. |
+| HTTPS request fails | Confirm `API_URL` uses HTTPS and `SERVER_ROOT_CA` contains the correct trusted root certificate. |
+| DHT11 readings fail | Check its data pin, power, ground, and installed Adafruit libraries. |
+| MQ-2 values seem unexpected | Check the voltage divider, sensor warm-up, raw ADC range, and sensor-specific calibration. |
 
----
+## 📁 Project structure
+
+```text
+.
+├── backend/
+│   └── server.js
+├── firmware/
+│   └── esp32_fire_alert/
+│       ├── Config.h
+│       └── esp32_fire_alert.ino
+├── public/
+│   ├── config.js
+│   └── ...
+├── .env.example
+├── Dockerfile
+└── compose.yaml
+```
 
 <div align="center">
 
-**Emberwatch · ESP32 + Node.js · Built for an educational project**
+**Built as an educational ESP32 project**<br>
+*Local alarms first. Dashboard updates when the network is available.*
 
 </div>
