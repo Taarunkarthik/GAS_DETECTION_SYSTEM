@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#090d18">
+    <title>Setup guide · Emberwatch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+      .guide-wrap { width: min(880px, 100%); margin: 0 auto; padding: 38px 24px 60px; }
+      .guide-back { display: inline-flex; align-items: center; gap: 7px; color: #e6a878; font-size: 10px; }
+      .guide-title { margin: 24px 0 7px; font: 700 clamp(28px, 4vw, 38px)/1.2 var(--display); letter-spacing: -1px; }
+      .guide-subtitle { margin: 0; color: #8994a7; font-size: 12px; line-height: 1.7; }
+      .guide-callout { margin: 22px 0; padding: 14px 16px; border: 1px solid rgba(255, 166, 109, .18); border-radius: 9px; background: rgba(255, 142, 83, .06); color: #d8c1b4; font-size: 10px; line-height: 1.7; }
+      .guide-callout strong { color: #ffb183; }
+      .guide-section { margin-top: 25px; padding: 18px 19px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+      .guide-section h2 { margin: 0 0 10px; color: #f0f2f5; font: 600 17px var(--display); letter-spacing: -.3px; }
+      .guide-section p, .guide-section li { color: #a4adbb; font-size: 10px; line-height: 1.75; }
+      .guide-section p { margin: 8px 0; }
+      .guide-section ol, .guide-section ul { display: grid; gap: 7px; padding-left: 20px; }
+      .guide-section li::marker { color: #e6a878; }
+      .guide-section code { padding: 2px 5px; color: #f1b18a; border-radius: 4px; background: rgba(255, 255, 255, .06); font: 400 9px var(--mono); }
+      .wiring-table { width: 100%; border-collapse: collapse; margin-top: 11px; }
+      .wiring-table th, .wiring-table td { padding: 9px 8px; border-bottom: 1px solid rgba(148, 161, 187, .1); color: #a4adbb; font-size: 9px; text-align: left; vertical-align: top; }
+      .wiring-table th { color: #e2ad8c; font: 500 8px var(--mono); letter-spacing: .5px; }
+      .wiring-table tr:last-child td { border-bottom: 0; }
+      .guide-architecture { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 8px; margin: 14px 0; }
+      .architecture-node { min-height: 66px; display: grid; place-content: center; gap: 4px; padding: 10px; text-align: center; border: 1px solid rgba(143, 160, 190, .15); border-radius: 8px; background: #151d2e; }
+      .architecture-node strong { color: #e3e8ef; font-size: 9px; }
+      .architecture-node small { color: #818ca0; font-size: 8px; }
+      .architecture-arrow { color: #ed9d71; font: 14px var(--mono); }
+      .guide-footer { margin-top: 24px; color: #667186; font-size: 9px; line-height: 1.6; }
+      @media (max-width: 580px) { .guide-architecture { grid-template-columns: 1fr; } .architecture-arrow { text-align: center; transform: rotate(90deg); } .wiring-table th, .wiring-table td { padding: 7px 4px; font-size: 8px; } }
+    </style>
+  </head>
+  <body>
+    <main class="guide-wrap">
+      <a class="guide-back" href="/">← Back to dashboard</a>
+      <div class="eyebrow" style="margin-top:31px"><span class="eyebrow-line"></span>GETTING STARTED</div>
+      <h1 class="guide-title">Bring your fire monitor online.</h1>
+      <p class="guide-subtitle">This project uses an ESP32 DevKit V1, an MQ-2 gas/smoke sensor, a DHT11 temperature/humidity sensor, and a small Node.js backend. The dashboard and the board must be able to reach the same backend.</p>
+      <div class="guide-callout"><strong>Prototype only:</strong> MQ-2 readings are raw, uncalibrated sensor values. This project is not a certified fire alarm and must not replace approved smoke alarms, fire systems, or emergency procedures.</div>
+
+      <section class="guide-section">
+        <h2>How the pieces connect</h2>
+        <div class="guide-architecture"><div class="architecture-node"><strong>ESP32 + sensors</strong><small>Samples every 2 seconds</small></div><span class="architecture-arrow">→ HTTP POST</span><div class="architecture-node"><strong>Node.js backend</strong><small>Validates and thresholds data</small></div><span class="architecture-arrow">→ SSE stream</span><div class="architecture-node"><strong>Web dashboard</strong><small>Live values, chart and alert popup</small></div></div>
+        <p>The ESP32 sends JSON to <code>/api/readings</code> with the <code>X-Device-Key</code> header. The backend stores each sample, detects alarm transitions, and streams updates to open browsers. LED and buzzer outputs run locally on the ESP32, so they do not depend on the website.</p>
+      </section>
+
+      <section class="guide-section">
+        <h2>Wire the ESP32</h2>
+        <table class="wiring-table"><thead><tr><th>PART</th><th>CONNECT</th><th>IMPORTANT</th></tr></thead><tbody>
+          <tr><td>MQ-2 module</td><td>VCC → 5V, GND → GND, AO → divider → GPIO 34</td><td>Use two 10 kΩ resistors: AO → 10 kΩ → GPIO 34; GPIO 34 → 10 kΩ → GND. This halves a 5 V AO signal. Share ground.</td></tr>
+          <tr><td>DHT11</td><td>VCC → 3.3V, GND → GND, DATA → GPIO 4</td><td>A bare sensor needs a pull-up from DATA to 3.3V. Many breakout modules already include one.</td></tr>
+          <tr><td>Red alert LED</td><td>GPIO 18 → 220–330 Ω resistor → LED anode; cathode → GND</td><td>Use an external LED.</td></tr>
+          <tr><td>Green safe LED</td><td>GPIO 19 → 220–330 Ω resistor → LED anode; cathode → GND</td><td>Use an external LED.</td></tr>
+          <tr><td>Active buzzer</td><td>GPIO 26 → 1 kΩ → NPN transistor base; emitter → GND; collector → buzzer negative; buzzer positive → its rated supply</td><td>Do not power a buzzer directly from a GPIO. Join external supply ground to ESP32 ground. Add a flyback diode for a magnetic buzzer.</td></tr>
+        </tbody></table>
+        <p>GPIO 34 is an ADC1 input on the classic ESP32 DevKit V1. Use the pin map for your specific board if you have another ESP32 variant. The ESP32 ADC accepts a limited input range; never connect the MQ-2's 5 V analog output directly.</p>
+      </section>
+
+      <section class="guide-section">
+        <h2>Start the website and backend</h2>
+        <ol>
+          <li>Install Node.js 18 or later. Open PowerShell in the project folder.</li>
+          <li>Copy <code>.env.example</code> to <code>.env</code>. For a classroom demo, the included development key can be used. Before hosting, set a long random <code>DEVICE_API_KEY</code> and copy the same value into <code>Config.h</code>.</li>
+          <li>Run <code>npm start</code>. No Docker and no npm packages are needed.</li>
+          <li>Open <code>http://localhost:3000</code> on the computer running the backend.</li>
+          <li>Find that computer's private IPv4 address with <code>ipconfig</code>. On Windows, allow Node.js on your private network if the firewall asks.</li>
+        </ol>
+      </section>
+
+      <section class="guide-section">
+        <h2>Upload the Arduino sketch</h2>
+        <ol>
+          <li>In Arduino IDE, install the ESP32 board package from Espressif and select your ESP32 Dev Module (or the matching board).</li>
+          <li>Install the <strong>DHT sensor library by Adafruit</strong> and <strong>Adafruit Unified Sensor</strong>.</li>
+          <li>Open <code>firmware/esp32_fire_alert/esp32_fire_alert.ino</code>. In the adjacent <code>Config.h</code>, set your 2.4 GHz Wi-Fi SSID/password, your computer's IP in <code>API_URL</code>, and the device key.</li>
+          <li>Keep the computer and ESP32 on the same Wi-Fi network, upload, and open Serial Monitor at <code>9600</code> baud.</li>
+          <li>When the Serial Monitor says a dashboard update was sent, refresh the dashboard. It updates live after that.</li>
+        </ol>
+        <p>Example local endpoint: <code>http://192.168.1.25:3000/api/readings</code>. Replace the IP with your computer's LAN address. Do not use <code>localhost</code> in the ESP32 URL: from the board, that would mean the board itself.</p>
+      </section>
+
+      <section class="guide-section">
+        <h2>Thresholds and calibration</h2>
+        <p>The starter thresholds are 30°C warning / 35°C fire and MQ-2 ADC 225 warning / 300 fire on a 0–4,095 scale. These demo values are not validated fire thresholds. The system shows safe, warning, and fire states. Update both <code>Config.h</code> and the matching values in <code>.env</code> if you tune them. Either sensor can raise the state.</p>
+        <p>MQ-2 modules need warm-up and individual calibration; follow the documentation supplied with your module (initial burn-in can be many hours). The ADC number is not ppm and is not a reliable measure of smoke density without calibration. Never test with an open flame.</p>
+      </section>
+
+      <section class="guide-section">
+        <h2>Using it away from your Wi-Fi</h2>
+        <p>For a remote dashboard, host this Node.js app on a Node-capable service that provides HTTPS. Set the environment variables there, then change <code>API_URL</code> to the hosted <code>https://…/api/readings</code> endpoint and add the host's trusted root certificate to <code>SERVER_ROOT_CA</code>. The sketch verifies TLS certificates; it does not disable verification. Do not expose the local Node port through your home router.</p>
+      </section>
+      <p class="guide-footer">The Arduino sketch contains more than five user-defined functions and a custom <code>Config.h</code>, as required by the project topic sheet. For a real building, install and maintain certified, code-compliant fire alarm equipment.</p>
+    </main>
+  </body>
+</html>

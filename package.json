@@ -1,0 +1,12 @@
+{
+  "name": "smart-fire-detection-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ESP32 fire detection telemetry API and live dashboard",
+  "scripts": {
+    "start": "node backend/server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
