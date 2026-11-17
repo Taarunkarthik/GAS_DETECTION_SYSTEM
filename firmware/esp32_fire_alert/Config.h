@@ -25,8 +25,8 @@
 // The backend .env thresholds must match these values.
 #define TEMP_WARNING       30.0f
 #define TEMP_CRITICAL      35.0f
-#define SMOKE_WARNING      225
-#define SMOKE_CRITICAL     300
+#define SMOKE_WARNING      400
+#define SMOKE_CRITICAL     500
 #define SAMPLE_COUNT       5
 #define SENSOR_INTERVAL_MS 2000UL
 #define WIFI_RETRY_INTERVAL_MS 10000UL

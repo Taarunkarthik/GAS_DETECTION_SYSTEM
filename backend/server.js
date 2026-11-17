@@ -27,8 +27,8 @@ const WEB_ORIGINS = new Set(
 const DEVICE_API_KEY = process.env.DEVICE_API_KEY || "demo-key-change-before-deployment";
 const TEMP_WARNING_C = Number(process.env.TEMP_WARNING_C || 30);
 const TEMP_THRESHOLD_C = Number(process.env.FIRE_TEMP_C || 35);
-const SMOKE_WARNING = Number(process.env.SMOKE_WARNING_RAW || 225);
-const SMOKE_THRESHOLD = Number(process.env.SMOKE_RAW_THRESHOLD || 300);
+const SMOKE_WARNING = Number(process.env.SMOKE_WARNING_RAW || 400);
+const SMOKE_THRESHOLD = Number(process.env.SMOKE_RAW_THRESHOLD || 500);
 
 if (process.env.NODE_ENV === "production" && DEVICE_API_KEY === "demo-key-change-before-deployment") {
   throw new Error("Set a unique DEVICE_API_KEY before starting in production.");

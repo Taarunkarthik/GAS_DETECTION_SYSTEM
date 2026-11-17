@@ -12,7 +12,7 @@ let previousAlarmActive = false;
 let browserAlertsEnabled = false;
 let audioContext = null;
 let alarmInterval = null;
-let currentThresholds = { temperatureWarningC: 30, temperatureC: 35, smokeRawWarning: 225, smokeRaw: 300 };
+let currentThresholds = { temperatureWarningC: 30, temperatureC: 35, smokeRawWarning: 400, smokeRaw: 500 };
 
 function localTime(value) {
   if (!value) return "--:--";

@@ -150,8 +150,8 @@ WEB_ORIGINS=https://gas-detection-gules.vercel.app
 DEVICE_API_KEY=<your-private-random-key>
 TEMP_WARNING_C=30
 FIRE_TEMP_C=35
-SMOKE_WARNING_RAW=225
-SMOKE_RAW_THRESHOLD=300
+SMOKE_WARNING_RAW=400
+SMOKE_RAW_THRESHOLD=500
 ```
 
 Set `window.EMBERWATCH_API_BASE` in `public/config.js` to the backend origin only (do not add `/api`), then redeploy the Vercel site. Set the firmware `API_URL` to `https://YOUR_BACKEND_HOST/api/readings`, configure `SERVER_ROOT_CA` with the host's trusted root CA certificate, and upload the firmware. Keep private keys and Wi-Fi credentials out of GitHub.
@@ -165,7 +165,7 @@ Keep the firmware and backend thresholds in sync. Adjust these values only after
 | Measurement | Warning | Fire alert |
 | --- | ---: | ---: |
 | Temperature | 30 °C | 35 °C |
-| MQ-2 raw ADC | 225 | 300 |
+| MQ-2 raw ADC | 400 | 500 |
 
 MQ-2 counts range from **0 to 4095** on this ESP32 setup. Sensor modules vary and need warm-up; these example thresholds are not validated fire limits. Never test the system by lighting a fire.
 

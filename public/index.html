@@ -94,7 +94,7 @@
                 <h2 id="heroTitle">Your watch begins<br>when the signal arrives.</h2>
                 <p id="heroDescription">Connect the ESP32 to stream live readings into the field console.</p>
                 <div class="watch-details">
-                  <span class="threshold-note"><span class="detail-icon">⌁</span><span id="thresholdSummary">Warn 30°C / fire 35°C · smoke 225 / 300 ADC</span></span>
+                  <span class="threshold-note"><span class="detail-icon">⌁</span><span id="thresholdSummary">Warn 30°C / fire 35°C · smoke 400 / 500 ADC</span></span>
                   <span class="detail-divider"></span>
                   <span id="deviceMeta">Device: ESP32 fire monitor</span>
                 </div>
@@ -150,7 +150,7 @@
               <div class="sensor-title">Smoke sensor signal</div>
               <div class="sensor-reading"><span id="smokeValue">--</span><small class="adc-unit">ADC <i>/ 4095</i></small></div>
               <div class="smoke-scale" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-              <div class="sensor-bottom"><span class="sensor-state state-muted" id="smokeState">Awaiting reading</span><span class="limit-label">WARN / FIRE <b id="smokeLimit">225 / 300</b></span></div>
+              <div class="sensor-bottom"><span class="sensor-state state-muted" id="smokeState">Awaiting reading</span><span class="limit-label">WARN / FIRE <b id="smokeLimit">400 / 500</b></span></div>
             </article>
 
 
@@ -190,7 +190,7 @@
                 <div class="sensor-title">Smoke sensor signal</div>
                 <div class="sensor-reading"><span id="smokeValueDetail">--</span><small class="adc-unit">ADC <i>/ 4095</i></small></div>
                 <div class="smoke-scale" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-                <div class="sensor-bottom"><span class="sensor-state state-muted" id="smokeStateDetail">Awaiting reading</span><span class="limit-label">WARN / FIRE <b id="smokeLimitDetail">225 / 300</b></span></div>
+                <div class="sensor-bottom"><span class="sensor-state state-muted" id="smokeStateDetail">Awaiting reading</span><span class="limit-label">WARN / FIRE <b id="smokeLimitDetail">400 / 500</b></span></div>
                 <div class="sensor-detail-note"><span>02</span><p>MQ-2 value is raw ADC, not ppm. Sensor warm-up and calibration affect the reading.</p></div>
               </article>
             </section>
@@ -292,8 +292,8 @@
                 <span class="panel-label">STARTER THRESHOLDS</span><h3>Read the signal</h3>
                 <div class="guide-threshold"><span>Temperature warning</span><b>30 °C</b></div>
                 <div class="guide-threshold"><span>Temperature fire</span><b>35 °C</b></div>
-                <div class="guide-threshold"><span>Smoke warning</span><b>225 ADC</b></div>
-                <div class="guide-threshold"><span>Smoke fire</span><b>300 ADC</b></div>
+                <div class="guide-threshold"><span>Smoke warning</span><b>400 ADC</b></div>
+                <div class="guide-threshold"><span>Smoke fire</span><b>500 ADC</b></div>
                 <small>Calibrate these demo values for your specific sensors.</small>
               </article>
             </div>
